@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  # The RustGIS the smoke test runs plugins in (a branch or tag of opengeos/RustGIS).
+  RUSTGIS_REF: ${{ vars.RUSTGIS_REF || 'main' }}
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: pre-commit/action@v3.0.1
+
+  registry:
+    name: Build and check the registry
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Build, package and check every plugin
+        run: python scripts/build.py --check
+      - name: RustGIS commit to test against
+        id: rustgis
+        run: echo "sha=$(git ls-remote https://github.com/opengeos/RustGIS "$RUSTGIS_REF" | cut -f1 | head -1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        id: cli
+        with:
+          path: ~/rustgis-cli
+          key: rustgis-cli-${{ runner.os }}-${{ steps.rustgis.outputs.sha }}
+      - name: Build rustgis-cli
+        if: steps.cli.outputs.cache-hit != 'true'
+        run: |
+          cargo install --locked --git https://github.com/opengeos/RustGIS --rev "${{ steps.rustgis.outputs.sha }}" rustgis-cli --root ~/rustgis-cli-root
+          mkdir -p ~/rustgis-cli && cp ~/rustgis-cli-root/bin/rustgis-cli ~/rustgis-cli/
+      - name: Run every plugin in RustGIS
+        run: python scripts/smoke.py --cli ~/rustgis-cli/rustgis-cli
+      - uses: actions/upload-artifact@v4
+        with:
+          name: registry
+          path: dist/

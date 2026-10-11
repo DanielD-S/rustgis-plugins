@@ -1,0 +1,57 @@
+{
+  "id": "vector-toolkit",
+  "name": "Vector Toolkit",
+  "version": "0.1.0",
+  "description": "Geoprocessing tools for sampling and tessellation: hexagon and square grids over a layer's extent, and random points inside polygons.",
+  "author": "opengeos",
+  "homepage": "https://github.com/opengeos/rustgis-plugins/tree/main/plugins/vector-toolkit",
+  "license": "MIT",
+  "entry": "plugin.wasm",
+  "abi": 1,
+  "minRustgisVersion": "0.1.0",
+  "permissions": [],
+  "tools": [
+    {
+      "id": "hexagon-grid",
+      "name": "Hexagon Grid",
+      "summary": "Covers a layer's extent with hexagons of a given size.",
+      "params": [
+        { "name": "input", "label": "Extent from layer", "kind": "vectorLayer", "required": true },
+        { "name": "size", "label": "Cell width (km)", "kind": "number", "required": true, "default": 250, "help": "The distance across a hexagon's flat sides, measured at the extent's middle latitude." },
+        { "name": "touching", "label": "Only cells with features", "kind": "bool", "default": false, "help": "Keep only cells that contain a vertex of an input feature." }
+      ]
+    },
+    {
+      "id": "square-grid",
+      "name": "Square Grid",
+      "summary": "Covers a layer's extent with square cells (a fishnet).",
+      "params": [
+        { "name": "input", "label": "Extent from layer", "kind": "vectorLayer", "required": true },
+        { "name": "size", "label": "Cell size (km)", "kind": "number", "required": true, "default": 250 },
+        { "name": "touching", "label": "Only cells with features", "kind": "bool", "default": false }
+      ]
+    },
+    {
+      "id": "random-points",
+      "name": "Random Points In Polygons",
+      "summary": "Scatters random points inside each polygon.",
+      "params": [
+        { "name": "input", "label": "Polygons", "kind": "polygonLayer", "required": true },
+        { "name": "count", "label": "Points per polygon", "kind": "number", "required": true, "default": 10 },
+        { "name": "seed", "label": "Random seed", "kind": "number", "default": 1, "help": "The same seed gives the same points." }
+      ]
+    }
+  ],
+  "i18n": {
+    "de": {
+      "Hexagon Grid": "Sechseckraster",
+      "Square Grid": "Quadratraster",
+      "Random Points In Polygons": "Zufallspunkte in Polygonen"
+    },
+    "zh-CN": {
+      "Hexagon Grid": "六边形格网",
+      "Square Grid": "正方形格网",
+      "Random Points In Polygons": "多边形内随机点"
+    }
+  }
+}

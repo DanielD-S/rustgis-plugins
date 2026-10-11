@@ -1,0 +1,21 @@
+[workspace]
+resolver = "3"
+members = ["sdk", "plugins/*"]
+
+[workspace.package]
+edition = "2024"
+license = "MIT"
+repository = "https://github.com/opengeos/rustgis-plugins"
+rust-version = "1.90"
+
+[workspace.dependencies]
+rustgis-plugin = { path = "sdk" }
+serde_json = "1"
+
+# Small, fast plugin modules. A panic aborts: RustGIS reports it as the plugin failing.
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

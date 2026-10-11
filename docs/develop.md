@@ -1,0 +1,151 @@
+# Write a plugin
+
+Copy [`plugins/hello`](https://github.com/opengeos/rustgis-plugins/tree/main/plugins/hello)
+to start. Plugins are written in Rust with the [`rustgis-plugin`](https://github.com/opengeos/rustgis-plugins/tree/main/sdk)
+SDK, and built for `wasm32-unknown-unknown` (`rustup target add wasm32-unknown-unknown`).
+
+```toml
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rustgis-plugin = { git = "https://github.com/opengeos/rustgis-plugins" }
+
+[profile.release]
+opt-level = "s"
+lto = true
+panic = "abort"
+strip = true
+```
+
+```rust
+use rustgis_plugin::{Kind, Request, ToolOutput, Value, geojson, host, json};
+
+fn handle(req: Request) -> Result<Value, String> {
+    match (req.kind, req.id.as_str()) {
+        (Kind::Command, "layer-report") => {
+            let n = host::layers()?.as_array().map_or(0, Vec::len);
+            host::notify(&format!("{n} layers"));
+            Ok(json!({"layers": n}))
+        }
+        (Kind::Tool, "bounding-boxes") => {
+            let boxes: Vec<Value> = req.features("input")?.iter().filter_map(|f| {
+                let b = geojson::bbox(&geojson::positions(&f["geometry"]))?;
+                Some(geojson::feature(geojson::polygon(&[[b[0], b[1]], [b[2], b[1]], [b[2], b[3]], [b[0], b[3]]]), json!({})))
+            }).collect();
+            Ok(ToolOutput::new().layer("Boxes", geojson::collection(boxes)).into())
+        }
+        (_, other) => Err(format!("unknown '{other}'")),
+    }
+}
+
+rustgis_plugin::export!(handle);
+```
+
+```sh
+cargo build --release --target wasm32-unknown-unknown
+# package plugin.json and the module (renamed plugin.wasm) as <id>-<version>.rgplugin:
+mkdir -p pkg && cp plugin.json pkg/ && cp target/wasm32-unknown-unknown/release/my_plugin.wasm pkg/plugin.wasm
+(cd pkg && zip -X ../my-plugin-0.1.0.rgplugin plugin.json plugin.wasm)
+```
+
+To try it while you work, load the folder instead of a package. In RustGIS, use
+**Plugins › Plugin Manager › Settings › Add Plugin Folder…**; on the command line, use
+`rustgis-cli run --plugin ./pkg --sample --cmd 'plugin:my-plugin/hello'`. Inside this repository,
+`python scripts/build.py` builds and packages every plugin into `dist/`, and
+`python scripts/smoke.py` runs them in RustGIS.
+
+## `plugin.json`
+
+```json
+{
+  "id": "hello-rustgis",
+  "name": "Hello RustGIS",
+  "version": "0.1.0",
+  "description": "What it does, in a sentence or two.",
+  "author": "You",
+  "homepage": "https://github.com/you/your-plugin",
+  "license": "MIT",
+  "entry": "plugin.wasm",
+  "abi": 1,
+  "minRustgisVersion": "0.1.0",
+  "permissions": ["edit"],
+  "commands": [
+    { "id": "layer-report", "label": "Layer\nReport", "help": "Shown on hover.", "icon": "stats", "params": "{}" }
+  ],
+  "tools": [
+    {
+      "id": "bounding-boxes", "name": "Bounding Boxes", "summary": "One line.", "toolbox": "Hello",
+      "params": [
+        { "name": "input", "label": "Input features", "kind": "vectorLayer", "required": true },
+        { "name": "whole", "label": "One box for the whole layer", "kind": "bool", "default": false }
+      ]
+    }
+  ],
+  "i18n": { "de": { "Layer\nReport": "Ebenen-\nbericht" } }
+}
+```
+
+- `id`: lower-case letters, digits and hyphens. Commands and tools get ids
+  `plugin:<id>/<command>`, which the ribbon, command search, scripts and `rustgis-cli` use.
+- `version` and `minRustgisVersion` look like `1.2.3`. RustGIS refuses a plugin that needs a
+  newer RustGIS.
+- `permissions`: `edit` and `files` (see [Safety](index.md#safety)). Ask only for what you use.
+- `commands[].icon`: the name of one of RustGIS's own icons (`stats`, `zoom_full`, `bookmark`,
+  `buffer`…), or a puzzle piece when it isn't one.
+- Tool parameter `kind`s: `layer`, `vectorLayer`, `polygonLayer`, `pointLayer`, `field`,
+  `numericField`, `number`, `text`, `choice` (with `choices`) and `bool`.
+- `i18n` translates the plugin's own labels, help, names and summaries into the interface
+  language, by language code (`de`, or `zh-CN` with a fallback to `zh`).
+
+A package is a zip archive named `<id>-<version>.rgplugin`. It holds `plugin.json` and the module
+at its root, or inside one top-level folder. Packages are at most 64 MB, and modules at most 48 MB.
+
+## What a plugin can ask for
+
+Inside a request, `host::call(op, params)` sends one of these to RustGIS:
+
+| Request | Answer |
+|---|---|
+| `host.info` | RustGIS's version, the ABI, the plugin's id and permissions |
+| `host.layers` | `[{id, name, raster, visible, geometry, features, selected, active, fields: [{name, type}]}]` |
+| `host.features` `{layer, selected?, limit?}` | the layer's features as GeoJSON; each feature has its `row` |
+| `host.view` | `{center: [lon, lat], scale, projection}` |
+| `host.notify` `{text, error?}` | shows a message in the status bar |
+| `host.addLayer` `{name, geojson}` | adds a layer (`edit`) |
+| any command id (`layer.zoomTo`, `select.byAttributes`, `layer.symbology`…) | what the command returns, within the plugin's permissions |
+
+`rustgis-cli commands` lists every command id and its parameters.
+
+Tools work differently. A tool receives its layer parameters' features as GeoJSON (only the
+selected features when a layer has a selection). It returns new layers, standalone tables or a
+selection, plus messages for the Geoprocessing history. RustGIS adds the results as it does for
+built-in tools, with undo. Tools can log, but they make no host requests.
+
+## The ABI (version 1)
+
+The SDK implements this; it is described here for other languages.
+
+The module is `wasm32` with no imports except these three, in module `rustgis`:
+
+- `call(ptr: i32, len: i32) -> i32` runs the host request at `ptr`
+  (`{"op": "...", "params": {...}}`). It returns the length of the reply, which is
+  `{"ok": value}` or `{"error": "text"}`, or `-1` when there is none.
+- `result(ptr: i32)` copies that reply to `ptr`. Allocate the length `call` returned first.
+- `log(ptr: i32, len: i32)` logs a UTF-8 line.
+
+The module exports:
+
+- `memory`.
+- `rustgis_alloc(len: i32) -> i32`, which returns room for `len` bytes. RustGIS writes the
+  request there.
+- `rustgis_call(ptr: i32, len: i32) -> i64`, which handles the request and returns
+  `reply_ptr << 32 | reply_len`. The reply is `{"ok": value}` or `{"error": "text"}`.
+
+Requests are `{"abi": 1, "kind": "command" | "tool", "id": "...", "params": {...}, "layers": {...}}`.
+Tools also get `layers`, which maps each layer's name to its FeatureCollection. A tool's `ok`
+value is `{"layers": [{"name", "geojson"}], "tables": [...], "selection": {"layer", "rows"},
+"messages": [...]}`.
+
+Each call gets a fresh instance, so a module keeps no state between calls and need not free
+memory. The fuel budget is about 2×10⁹ instructions for a command and 4×10¹⁰ for a tool.

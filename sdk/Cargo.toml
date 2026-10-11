@@ -1,0 +1,12 @@
+[package]
+name = "rustgis-plugin"
+version = "0.1.0"
+description = "SDK for RustGIS plugins: WebAssembly modules that add commands and geoprocessing tools to RustGIS"
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+keywords = ["gis", "rustgis", "plugin", "wasm"]
+
+[dependencies]
+serde_json = { version = "1", features = ["std"] }

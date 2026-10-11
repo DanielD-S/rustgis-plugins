@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Builds the RustGIS plugin registry: packages, registry.json, blocklist.json and the catalog.
+"""Builds the RustGIS plugin registry: registry.json, the package index and new packages.
 
-    python scripts/build.py            # build plugins, package them, write dist/
+    python scripts/build.py            # build what changed, write dist/
     python scripts/build.py --check    # also fail on any problem (CI)
-    python scripts/build.py --no-cargo # reuse the modules already built
+    python scripts/build.py --no-cache # ignore the published index (rebuild or reuse from R2)
     python scripts/build.py --inspect <checkout> <out> registry/<id>.json...
                                        # unpack the packages these entries point at, for review
 
@@ -12,14 +12,22 @@ Each plugin has an entry in registry/<id>.json:
 - a plugin in this repository names its folder: {"id": ..., "path": "plugins/<dir>"}; it is
   built from source with cargo and packaged here.
 - a plugin hosted elsewhere names its package: {"id": ..., "source": {"url": "https://...rgplugin",
-  "sha256": "..."}}; it is downloaded, checked against the hash, and served from here.
+  "sha256": "..."}}; it is downloaded and checked against the hash.
+
+Packages are served from packages.rustgis.app (a Cloudflare R2 bucket) at <id>/<id>-<version>.rgplugin
+and never change once published. So the build is incremental: the previous deploy's package
+index (plugins.rustgis.app/packages.json) says what is published, and only plugins whose version
+(or source) changed are built or downloaded. An in-repository plugin whose files changed without
+a version bump is a problem. Without the index, packages already in the bucket are reused rather
+than rebuilt. Output goes to dist/:
+
+    dist/registry.json      what RustGIS lists (every plugin, with its package URL and SHA-256)
+    dist/packages.json      the package index: each plugin's package, manifest and source hash
+    dist/packages/<id>/...  the packages built or downloaded by this run (to upload)
+    dist/new.txt            their paths, relative to dist/packages
 
 Everything users see (name, version, description, permissions...) comes from the package's
-plugin.json, so it can't disagree with what is installed. Output goes to dist/:
-
-    dist/registry.json
-    dist/blocklist.json
-    dist/packages/<id>/<id>-<version>.rgplugin   (never changes once published)
+plugin.json, so it can't disagree with what is installed.
 """
 
 from __future__ import annotations
@@ -32,17 +40,23 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 import tomllib
+import urllib.error
 import urllib.request
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+# Where packages are served (the R2 bucket's domain), and the previous deploy's package index.
+PACKAGES_URL = "https://packages.rustgis.app"
+INDEX_URL = "https://plugins.rustgis.app/packages.json"
 DIST = ROOT / "dist"
 TARGET = ROOT / "target" / "wasm32-unknown-unknown" / "release"
 
 ID_RE = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
-VERSION_RE = re.compile(r"^\d+(\.\d+){0,2}([-+].*)?$")
+# Versions name objects in the bucket, so only safe characters: 1.2.3, 1.2.3-beta.1, 1.2.3+build.5.
+VERSION_RE = re.compile(r"^\d+(\.\d+){0,2}([-+][0-9A-Za-z]+(\.[0-9A-Za-z]+)*)*$")
 SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 PERMISSIONS = {"edit", "files"}
 PARAM_KINDS = {"layer", "vectorLayer", "polygonLayer", "pointLayer", "field", "numericField", "number", "text", "choice", "bool"}
@@ -259,8 +273,14 @@ def read_package(data: bytes, where: str) -> tuple[dict, bytes] | None:
         return None
 
 
+def package_name(folder: Path) -> str:
+    """The cargo package name of an in-repository plugin (for `cargo build -p`)."""
+    return tomllib.loads((folder / "Cargo.toml").read_text())["package"]["name"]
+
+
 def crate_name(folder: Path) -> str:
-    return tomllib.loads((folder / "Cargo.toml").read_text())["package"]["name"].replace("-", "_")
+    """The plugin's crate name, which names its .wasm file."""
+    return package_name(folder).replace("-", "_")
 
 
 def download(url: str) -> bytes:
@@ -275,6 +295,118 @@ def download(url: str) -> bytes:
 
 
 # --------------------------------------------------------------------------------------------
+
+
+def tree_hash(folder: Path) -> str:
+    """Hashes an in-repository plugin's files (its source, manifest and README), so a change
+    without a version bump can be caught. Only the plugin's own folder counts: a change to the
+    shared SDK, the workspace lockfile or the toolchain doesn't republish existing versions.
+
+    Args:
+        folder: The plugin's folder.
+
+    Returns:
+        The lower-case hex SHA-256 over every file's relative path and contents.
+    """
+    h = hashlib.sha256()
+    # The files git tracks (no build output, editor backups or links to elsewhere); every file
+    # when this isn't a git checkout.
+    try:
+        out = subprocess.run(["git", "ls-files", "-z", "--", "."], cwd=folder, capture_output=True, check=True).stdout
+        files = sorted(folder / f for f in out.decode().split("\0") if f)
+    except (OSError, subprocess.CalledProcessError):
+        files = sorted(p for p in folder.rglob("*") if p.is_file() and p.relative_to(folder).parts[0] != "target")
+    for f in files:
+        if not f.is_file() or f.is_symlink():
+            continue
+        h.update(f.relative_to(folder).as_posix().encode() + b"\0")
+        h.update(hashlib.sha256(f.read_bytes()).digest())
+    return h.hexdigest()
+
+
+MAX_INDEX = 256 * 1024 * 1024
+
+
+def load_index(source: str | None) -> dict:
+    """Reads the previous deploy's package index.
+
+    Only a missing index (404: the first deploy) means "no index". Any other failure (network,
+    timeout, a truncated or malformed file) is a problem, because without the index the check
+    that in-repository plugins bumped their version can't run.
+
+    Args:
+        source: A URL or a file path, or None for no index.
+
+    Returns:
+        The index's plugins by id (empty when there is none or it can't be read).
+    """
+    if not source:
+        return {}
+    try:
+        if source.startswith("https://"):
+            req = urllib.request.Request(f"{source}?{time.time_ns()}", headers={"User-Agent": "rustgis-plugins-registry", "Cache-Control": "no-cache"})
+            with urllib.request.urlopen(req, timeout=60) as r:
+                raw = r.read(MAX_INDEX + 1)
+        else:
+            raw = Path(source).read_bytes()
+        if len(raw) > MAX_INDEX:
+            raise ValueError(f"larger than {MAX_INDEX // (1024 * 1024)} MB")
+        data = json.loads(raw)
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            print("note: no package index yet (first deploy); reusing packages already in the bucket", file=sys.stderr)
+            return {}
+        problem(f"the package index {source} couldn't be read ({e}); rerun once it is reachable")
+        return {}
+    except Exception as e:  # noqa: BLE001 - any other failure stops a checked build
+        problem(f"the package index {source} couldn't be read ({e}); rerun once it is reachable")
+        return {}
+    return {p["id"]: p for p in data.get("plugins", []) if valid_cached(p)}
+
+
+def valid_cached(p: object) -> bool:
+    """Whether a package index entry has what reusing it needs; anything else is rebuilt.
+
+    Args:
+        p: An entry from the index.
+
+    Returns:
+        True when it can be reused.
+    """
+    if not isinstance(p, dict):
+        return False
+    m = p.get("manifest")
+    return (
+        isinstance(p.get("id"), str)
+        and isinstance(p.get("version"), str)
+        and SHA_RE.match(str(p.get("sha256", ""))) is not None
+        and isinstance(p.get("size"), int)
+        and isinstance(p.get("origin"), dict)
+        and isinstance(m, dict)
+        and m.get("id") == p["id"]
+        and m.get("version") == p["version"]
+    )
+
+
+def published(url: str) -> bytes | None:
+    """Downloads a package already in the bucket (bypassing caches, so a cached 404 isn't
+    believed).
+
+    Args:
+        url: The package's URL.
+
+    Returns:
+        Its bytes, or None when it isn't there.
+
+    Raises:
+        Exception: when the bucket can't be asked (anything but a 404).
+    """
+    try:
+        return download(f"{url}?{time.time_ns()}")
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            return None
+        raise
 
 
 def inspect(checkout: Path, out: Path, files: list[str]) -> int:
@@ -346,16 +478,18 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--check", action="store_true", help="exit with an error on any problem")
     ap.add_argument("--no-cargo", action="store_true", help="don't run cargo; use the modules already built")
+    ap.add_argument("--index", default=INDEX_URL, help="the previous package index (URL or file)")
+    ap.add_argument("--no-cache", action="store_true", help="ignore the package index")
+    ap.add_argument("--no-bucket", action="store_true", help="don't look for packages in the bucket (offline)")
     args = ap.parse_args()
 
-    if not args.no_cargo:
-        subprocess.run(["cargo", "build", "--release", "--target", "wasm32-unknown-unknown", "--workspace", "--exclude", "rustgis-plugin"], cwd=ROOT, check=True)
-
+    index = {} if args.no_cache else load_index(args.index)
     if DIST.exists():
         shutil.rmtree(DIST)
     (DIST / "packages").mkdir(parents=True)
 
-    entries = []
+    # What each entry needs: reuse the published package, build it, or download it.
+    plans = []
     for path in sorted((ROOT / "registry").glob("*.json")):
         where = f"registry/{path.name}"
         try:
@@ -363,53 +497,120 @@ def main() -> int:
         except json.JSONDecodeError as e:
             problem(f"{where}: {e}")
             continue
-        if reg.get("id") != path.stem:
+        if reg.get("id") != path.stem or not ID_RE.match(path.stem):
             problem(f"{where}: the file name must be the plugin id")
             continue
         for c in reg.get("categories", []):
             if c not in CATEGORIES:
                 problem(f"{where}: unknown category '{c}' (one of {', '.join(sorted(CATEGORIES))})")
+        cached = index.get(reg["id"])
         if "path" in reg:
             folder = ROOT / reg["path"]
             manifest_path = folder / "plugin.json"
             if not manifest_path.is_file():
                 problem(f"{where}: {reg['path']}/plugin.json is missing")
                 continue
-            wasm_path = TARGET / f"{crate_name(folder)}.wasm"
-            if not wasm_path.is_file():
-                problem(f"{where}: {wasm_path.relative_to(ROOT)} wasn't built")
+            try:
+                version = str(json.loads(manifest_path.read_text()).get("version", ""))
+            except (OSError, json.JSONDecodeError) as e:
+                problem(f"{where}: {reg['path']}/plugin.json: {e}")
                 continue
-            data = package(manifest_path, wasm_path.read_bytes())
+            tree = tree_hash(folder)
+            origin = {"path": reg["path"], "tree": tree}
+            if cached and cached.get("version") == version and cached.get("origin", {}).get("path"):
+                if cached["origin"].get("tree") != tree:
+                    problem(f"{where}: {reg['path']} changed but its version is still {version}: published packages never change, so bump the version")
+                    continue
+                plans.append((reg, where, "reuse", cached, origin))
+            else:
+                plans.append((reg, where, "build", folder, origin))
         elif "source" in reg:
             src = reg["source"]
             if not SHA_RE.match(src.get("sha256", "")):
                 problem(f"{where}: source.sha256 must be the package's lower-case hex SHA-256")
                 continue
-            try:
-                data = download(src.get("url", ""))
-            except Exception as e:  # noqa: BLE001 - any download failure is a registry problem
-                problem(f"{where}: can't download {src.get('url')}: {e}")
-                continue
-            if sha256(data) != src["sha256"]:
-                problem(f"{where}: {src['url']} doesn't match source.sha256 (it is {sha256(data)})")
-                continue
+            origin = {"source": src.get("url", ""), "sha256": src["sha256"]}
+            if cached and cached.get("origin", {}).get("sha256") == src["sha256"]:
+                plans.append((reg, where, "reuse", cached, origin))
+            else:
+                plans.append((reg, where, "download", src, origin))
         else:
             problem(f"{where}: needs a 'path' (a plugin in this repository) or a 'source' (a package hosted elsewhere)")
-            continue
-        read = read_package(data, where)
-        if read is None:
-            continue
-        manifest, wasm = read
-        check_manifest(manifest, where)
-        check_tab(manifest, where)
-        check_module(wasm, where)
-        if manifest.get("id") != reg["id"]:
-            problem(f"{where}: the package's id is '{manifest.get('id')}'")
-            continue
+
+    # Build only the plugins that need it.
+    to_build = [package_name(p[3]) for p in plans if p[2] == "build"]
+    if to_build and not args.no_cargo:
+        cmd = ["cargo", "build", "--release", "--target", "wasm32-unknown-unknown"]
+        for c in to_build:
+            cmd += ["-p", c]
+        subprocess.run(cmd, cwd=ROOT, check=True)
+
+    entries, packages, new = [], [], []
+    for reg, where, how, what, origin in plans:
+        if how == "reuse":
+            manifest, digest, size, fresh = what["manifest"], what["sha256"], what["size"], None
+            # Rules added since it was published apply to it too.
+            check_manifest(manifest, where)
+            check_tab(manifest, where)
+        else:
+            if how == "build":
+                wasm_path = TARGET / f"{crate_name(what)}.wasm"
+                if not wasm_path.is_file():
+                    problem(f"{where}: {wasm_path.relative_to(ROOT)} wasn't built")
+                    continue
+                data = package(what / "plugin.json", wasm_path.read_bytes())
+            else:
+                try:
+                    data = download(what.get("url", ""))
+                except Exception as e:  # noqa: BLE001 - any download failure is a registry problem
+                    problem(f"{where}: can't download {what.get('url')}: {e}")
+                    continue
+                if sha256(data) != what["sha256"]:
+                    problem(f"{where}: {what['url']} doesn't match source.sha256 (it is {sha256(data)})")
+                    continue
+            read = read_package(data, where)
+            if read is None:
+                continue
+            manifest, wasm = read
+            check_manifest(manifest, where)
+            check_tab(manifest, where)
+            check_module(wasm, where)
+            if manifest.get("id") != reg["id"]:
+                problem(f"{where}: the package's id is '{manifest.get('id')}'")
+                continue
+            # A version already in the bucket is never replaced: reuse it (a rebuild needn't be
+            # byte-identical), unless it's a different plugin under that name.
+            url = f"{PACKAGES_URL}/{manifest['id']}/{manifest['id']}-{manifest['version']}.rgplugin"
+            try:
+                existing = None if args.no_bucket else published(url)
+            except Exception as e:  # noqa: BLE001 - reported like the other downloads
+                problem(f"{where}: can't check {url}: {e}")
+                continue
+            if existing is not None and how == "download" and sha256(existing) != sha256(data):
+                problem(f"{where}: {manifest['id']} {manifest['version']} is already published with different contents; bump the version")
+                continue
+            if existing is not None and how == "build":
+                # A rebuild needn't be byte-identical, but what it declares must match what is
+                # published under this version: otherwise the version wasn't bumped.
+                old = read_package(existing, f"{url} (published)")
+                if old is None or old[0] != manifest:
+                    problem(f"{where}: plugin.json differs from the published {manifest['id']} {manifest['version']}; bump the version")
+                    continue
+                if old[1] != wasm:
+                    print(
+                        f"warning: {where}: the rebuilt module differs from the published {manifest['id']} {manifest['version']}"
+                        " (a different toolchain, or code changed without a version bump); the published one is kept",
+                        file=sys.stderr,
+                    )
+            data = existing if existing is not None else data
+            digest, size, fresh = sha256(data), len(data), data if existing is None else None
         name = f"{manifest['id']}-{manifest['version']}.rgplugin"
-        out = DIST / "packages" / manifest["id"] / name
-        out.parent.mkdir(parents=True, exist_ok=True)
-        out.write_bytes(data)
+        if fresh is not None:
+            out = DIST / "packages" / manifest["id"] / name
+            out.parent.mkdir(parents=True, exist_ok=True)
+            out.write_bytes(fresh)
+            new.append(f"{manifest['id']}/{name}")
+        packages.append({"id": manifest["id"], "version": manifest["version"], "sha256": digest, "size": size, "origin": origin, "manifest": manifest})
         entries.append(
             {
                 "id": manifest["id"],
@@ -420,9 +621,9 @@ def main() -> int:
                 "homepage": manifest.get("homepage", ""),
                 "license": manifest.get("license", ""),
                 "categories": reg.get("categories", []),
-                "package": f"packages/{manifest['id']}/{name}",
-                "sha256": sha256(data),
-                "size": len(data),
+                "package": f"{PACKAGES_URL}/{manifest['id']}/{name}",
+                "sha256": digest,
+                "size": size,
                 "minRustgisVersion": manifest.get("minRustgisVersion", ""),
                 "permissions": manifest.get("permissions", []),
                 "commands": [c.get("label", "").replace("\n", " ") for c in manifest.get("commands", [])],
@@ -430,6 +631,7 @@ def main() -> int:
                 "tab": (manifest.get("tab") or {}).get("label", ""),
             }
         )
+    print(f"{len(new)} new packages, {len(entries) - len(new)} already published")
 
     blocklist = json.loads((ROOT / "blocklist.json").read_text())
     for b in blocklist.get("blocked", []):
@@ -440,8 +642,11 @@ def main() -> int:
             problem(f"blocklist.json: {b['id']} is blocked but still listed in registry/")
 
     entries.sort(key=lambda e: e["name"].lower())
-    (DIST / "registry.json").write_text(json.dumps({"version": 1, "plugins": entries}, indent=2, ensure_ascii=False) + "\n")
+    (DIST / "registry.json").write_text(json.dumps({"version": 1, "plugins": entries}, ensure_ascii=False, separators=(",", ":")) + "\n")
     (DIST / "blocklist.json").write_text(json.dumps(blocklist, indent=2) + "\n")
+    packages.sort(key=lambda p: p["id"])
+    (DIST / "packages.json").write_text(json.dumps({"version": 1, "plugins": packages}, ensure_ascii=False) + "\n")
+    (DIST / "new.txt").write_text("".join(f"{n}\n" for n in new))
     print(f"{len(entries)} plugins -> {DIST.relative_to(ROOT)}/registry.json")
     if args.check and problems:
         print(f"{len(problems)} problems", file=sys.stderr)

@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Loads every package in dist/ into RustGIS and runs it on the World Atlas sample.
+"""Loads packages into RustGIS and runs them on the World Atlas sample.
 
-    python scripts/smoke.py [--cli path/to/rustgis-cli]
+    python scripts/smoke.py [--cli path/to/rustgis-cli]         # the packages this build made
+    python scripts/smoke.py --all [--cli path/to/rustgis-cli]   # every listed package (nightly)
 
 For each plugin: RustGIS must load it and list its commands; each tool runs with its defaults
 (layer parameters get a sample layer of the right kind) and must succeed; each command that
@@ -12,17 +13,20 @@ command may need a selection or a layer the sample doesn't have).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.request
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DIST = ROOT / "dist"
+MAX_PACKAGE = 64 * 1024 * 1024
 # A sample layer for each layer kind, and a field of it.
 SAMPLE = {"polygonLayer": "Countries", "pointLayer": "Cities", "vectorLayer": "Countries", "layer": "Countries"}
 FIELDS = {"field": "name", "numericField": "pop_est"}
@@ -39,12 +43,43 @@ def run(cli: str, package: Path, cmds: list[str], plugins_dir: str) -> subproces
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--cli", default=os.environ.get("RUSTGIS_CLI") or shutil.which("rustgis-cli") or "rustgis-cli")
+    ap.add_argument("--all", action="store_true", help="every listed package, downloading published ones")
+    ap.add_argument("--shard", default="1/1", help="with --all, run part k of n (k/n), for parallel jobs")
     args = ap.parse_args()
+    k, n = (int(x) for x in args.shard.split("/"))
     registry = json.loads((DIST / "registry.json").read_text())
     failures = 0
-    with tempfile.TemporaryDirectory() as plugins_dir:
-        for e in registry["plugins"]:
-            package = DIST / e["package"]
+    with tempfile.TemporaryDirectory() as plugins_dir, tempfile.TemporaryDirectory() as downloads:
+        ran = 0
+        for i, e in enumerate(registry["plugins"]):
+            if i % n != k - 1:
+                continue
+            # Built by this run, or (with --all) downloaded from the bucket.
+            file_name = e["package"].rsplit("/", 1)[-1]
+            package = DIST / "packages" / e["id"] / file_name
+            if not package.is_file():
+                if not args.all:
+                    continue
+                package = Path(downloads) / file_name
+                if not str(e["package"]).startswith("https://"):
+                    print(f"error: {e['id']}: package URL isn't https: {e['package']}")
+                    failures += 1
+                    continue
+                try:
+                    req = urllib.request.Request(e["package"], headers={"User-Agent": "rustgis-plugins-smoke"})
+                    with urllib.request.urlopen(req, timeout=120) as r:  # noqa: S310 - https only, checked above
+                        data = r.read(MAX_PACKAGE + 1)
+                except Exception as err:  # noqa: BLE001 - one bad download mustn't stop the run
+                    print(f"error: {e['id']}: can't download {e['package']}: {err}")
+                    failures += 1
+                    continue
+                # Test what users install: the bytes the registry lists.
+                if len(data) > MAX_PACKAGE or hashlib.sha256(data).hexdigest() != e.get("sha256"):
+                    print(f"error: {e['id']}: {e['package']} doesn't match the registry's SHA-256")
+                    failures += 1
+                    continue
+                package.write_bytes(data)
+            ran += 1
             print(f"== {e['id']} {e['version']}")
             listed = run(args.cli, package, ["info.commands"], plugins_dir)
             if listed.returncode != 0:
@@ -85,7 +120,9 @@ def main() -> int:
                 else:
                     print(f"error: tool {t['id']} failed: {r.stderr.strip()}")
                     failures += 1
-    print(f"{failures} failures")
+    if ran == 0:
+        print("no new packages to run" if not args.all else "no packages in this shard")
+    print(f"{ran} plugins run, {failures} failures")
     return 1 if failures else 0
 
 

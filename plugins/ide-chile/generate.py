@@ -28,7 +28,7 @@ GEOPORTAL_CREDIT = "Geoportal de Chile, IDE Chile ({})"
 
 def export(base, show=None):
     """An ArcGIS MapServer export tile template, optionally of some layers only."""
-    t = base + "/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image"
+    t = base + "/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image"
     if show:
         t += "&layers=show:" + ",".join(str(i) for i in show)
     return t
@@ -143,7 +143,9 @@ PARAMS = '{"data"?: bool (load the features into a layer instead of the map imag
 
 # Messages the module builds while it runs (see src/lib.rs), with their Spanish.
 MESSAGES = {
-    "Added {name} (map image).": "Añadida {name} (imagen del mapa).",
+    "Added {name} (map image, under the layers; Map › Basemap lists it).": "Añadida {name} (imagen del mapa, bajo las capas; Mapa › Mapa base la lista).",
+    "In the web app, add {name} with Home › Add Data › From URL and this address: {url}": "En la app web, añada {name} con Inicio › Añadir datos › Desde URL y esta dirección: {url}",
+    "In the web app, {name} is shown as a map image; its features need the desktop app.": "En la app web, {name} se muestra como imagen del mapa; sus entidades requieren la app de escritorio.",
     "Added {name}.": "Añadida {name}.",
     "Added {name} in the map view.": "Añadida {name} en la vista del mapa.",
     "{name} is read in the map view: zoom in to 1:2,000,000 or closer first.": "{name} se lee en la vista del mapa: acerque primero a 1:2.000.000 o más cerca.",

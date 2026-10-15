@@ -66,9 +66,11 @@ pub fn tile_id(e: &Entry) -> String {
 
 /// The parameters of `map.addTiles` for an entry's map image.
 pub fn tiles_params(e: &Entry) -> Value {
+    // 512-pixel tiles halve the requests a server renders on demand answers, and nothing is
+    // asked below zoom 4, where Chile is a sliver and a continent's worth of tiles would be.
     json!({
-        "url": e.tiles, "kind": "raster", "name": e.name, "attribution": e.credit, "maxZoom": 19,
-        "overlay": true, "id": tile_id(e),
+        "url": e.tiles, "kind": "raster", "name": e.name, "attribution": e.credit, "minZoom": 4, "maxZoom": 19,
+        "tileSize": 512, "overlay": true, "id": tile_id(e),
     })
 }
 
@@ -154,7 +156,25 @@ fn choose(req: &Request, e: &Entry, data: bool) -> Result<Value, String> {
             }
             Some(view_bbox(&view).ok_or("the map has no view to read the features in")?)
         };
-        let out = host::run("layer.addUrl", json!({"url": features_url(e, bbox), "name": e.name, "zoom": e.whole}))?;
+        let url = features_url(e, bbox);
+        let out = match host::run("layer.addUrl", json!({"url": url, "name": e.name, "zoom": e.whole})) {
+            Ok(out) => out,
+            // The web app downloads only from its own Add Data dialog, not from a command: show
+            // the map image instead where there is one, else say where the address goes.
+            Err(err) if err.contains("web app") => {
+                if e.tiles.is_empty() {
+                    return Err(req.tr(
+                        MANIFEST,
+                        "In the web app, add {name} with Home › Add Data › From URL and this address: {url}",
+                        &[("name", e.name), ("url", &url)],
+                    ));
+                }
+                let out = add_tiles(req, e)?;
+                host::notify(&req.tr(MANIFEST, "In the web app, {name} is shown as a map image; its features need the desktop app.", name));
+                return Ok(out);
+            }
+            Err(err) => return Err(err),
+        };
         host::notify(&req.tr(MANIFEST, if e.whole { "Added {name}." } else { "Added {name} in the map view." }, name));
         return Ok(out);
     }
@@ -165,9 +185,14 @@ fn choose(req: &Request, e: &Entry, data: bool) -> Result<Value, String> {
         host::notify(&req.tr(MANIFEST, "Removed {name}.", name));
         return Ok(json!({"removed": e.name}));
     }
-    let out = host::run("map.addTiles", tiles_params(e))?;
-    host::notify(&req.tr(MANIFEST, "Added {name} (map image).", name));
+    let out = add_tiles(req, e)?;
+    host::notify(&req.tr(MANIFEST, "Added {name} (map image, under the layers; Map › Basemap lists it).", name));
     Ok(out)
+}
+
+/// Adds an entry's map image (a web tile layer, drawn under the map's own layers).
+fn add_tiles(_req: &Request, e: &Entry) -> Result<Value, String> {
+    host::run("map.addTiles", tiles_params(e))
 }
 
 /// Removes the plugin's map images, bottom first so the indexes stay valid.

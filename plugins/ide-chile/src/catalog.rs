@@ -7,7 +7,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "regions",
         name: "Regiones (IDE MINAGRI)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/LIMITES_ADMINISTRATIVOS_MINAGRI/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:1,2,3,4",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/LIMITES_ADMINISTRATIVOS_MINAGRI/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&layers=show:1,2,3,4",
         service: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/LIMITES_ADMINISTRATIVOS_MINAGRI/MapServer",
         kind: "arcgis",
         layer: "4",
@@ -17,7 +17,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "communes",
         name: "Comunas (IDE MINAGRI)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/LIMITES_ADMINISTRATIVOS_MINAGRI/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:6,7,8,9",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/LIMITES_ADMINISTRATIVOS_MINAGRI/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&layers=show:6,7,8,9",
         service: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/LIMITES_ADMINISTRATIVOS_MINAGRI/MapServer",
         kind: "arcgis",
         layer: "9",
@@ -27,7 +27,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "soils",
         name: "Suelos agrológicos (CIREN)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/SUELOS_AGROLOGICOS/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/SUELOS_AGROLOGICOS/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -37,7 +37,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "land-use",
         name: "Uso de la tierra (CONAF)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/USO_DE_LA_TIERRA_CUT_CONAF/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/USO_DE_LA_TIERRA_CUT_CONAF/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -47,7 +47,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "rural-properties",
         name: "Propiedades rurales (CIREN)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/PROPIEDADES_RURALES/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/PROPIEDADES_RURALES/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -57,7 +57,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "irrigation",
         name: "Infraestructura de riego (CIREN)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/INFRAESTRUCTURA_RIEGO/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/INFRAESTRUCTURA_RIEGO/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -67,7 +67,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "erosion",
         name: "Erosión actual (CIREN)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/EROSION/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/EROSION/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -77,7 +77,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "fruit-cadastre",
         name: "Catastro frutícola (CIREN)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/CATASTRO_FRUTICOLA/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/CATASTRO_FRUTICOLA/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -87,7 +87,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "weather-stations",
         name: "Estaciones meteorológicas (IDE MINAGRI)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/AGROCLIMA_IDEMINAGRI/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:7",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/AGROCLIMA_IDEMINAGRI/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&layers=show:7",
         service: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/AGROCLIMA_IDEMINAGRI/MapServer",
         kind: "arcgis",
         layer: "7",
@@ -97,7 +97,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "summer-pastures",
         name: "Veranadas (IDE MINAGRI)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/VERANADAS/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/VERANADAS/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/VERANADAS/MapServer",
         kind: "arcgis",
         layer: "0",
@@ -107,7 +107,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "hunting-ban",
         name: "Áreas prohibidas de caza (SAG)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/AREAS_PROHIBIDAS_CAZA/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/AREAS_PROHIBIDAS_CAZA/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/AREAS_PROHIBIDAS_CAZA/MapServer",
         kind: "arcgis",
         layer: "0",
@@ -117,7 +117,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "wildfires",
         name: "Incendios forestales 2024–2025 (CONAF)",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/INCENDIOS/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/INCENDIOS/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/INCENDIOS/MapServer",
         kind: "arcgis",
         layer: "0",
@@ -127,7 +127,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "ramsar",
         name: "Humedales Ramsar",
-        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/HUMEDALES/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/HUMEDALES/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/HUMEDALES/MapServer",
         kind: "arcgis",
         layer: "0",
@@ -187,7 +187,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "urban-limits",
         name: "Límites urbanos (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/IPT/Limites_Urbanos/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://geoide.minvu.cl/server/rest/services/IPT/Limites_Urbanos/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "https://geoide.minvu.cl/server/rest/services/IPT/Limites_Urbanos/MapServer",
         kind: "arcgis",
         layer: "0",
@@ -197,7 +197,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "risk-areas",
         name: "Áreas de riesgo IPT (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/IPT/IPT_AREA_RIESGO/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://geoide.minvu.cl/server/rest/services/IPT/IPT_AREA_RIESGO/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -207,7 +207,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "heritage",
         name: "Patrimonio ICH y ZCH (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/IPT/Patrimonio/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://geoide.minvu.cl/server/rest/services/IPT/Patrimonio/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",
@@ -217,7 +217,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "urban-wetlands",
         name: "Humedales urbanos 2020 (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/Inventario_de_Humedales/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://geoide.minvu.cl/server/rest/services/Inventario_de_Humedales/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "https://geoide.minvu.cl/server/rest/services/Inventario_de_Humedales/MapServer",
         kind: "arcgis",
         layer: "0",
@@ -227,7 +227,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "settlements",
         name: "Campamentos 2026 (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/Catastros/Catastros_campamentos/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:0",
+        tiles: "https://geoide.minvu.cl/server/rest/services/Catastros/Catastros_campamentos/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&layers=show:0",
         service: "https://geoide.minvu.cl/server/rest/services/Catastros/Catastros_campamentos/MapServer",
         kind: "arcgis",
         layer: "0",
@@ -237,7 +237,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "urban-parks",
         name: "Parques urbanos (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/Catastros/Catastro_de_parques_urbanos/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://geoide.minvu.cl/server/rest/services/Catastros/Catastro_de_parques_urbanos/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "https://geoide.minvu.cl/server/rest/services/Catastros/Catastro_de_parques_urbanos/MapServer",
         kind: "arcgis",
         layer: "1",
@@ -247,7 +247,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "housing-deficit",
         name: "Déficit habitacional 2024 (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/Otros/D%C3%A9ficit_habitacional_cuantitativo_2024/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image&layers=show:1",
+        tiles: "https://geoide.minvu.cl/server/rest/services/Otros/D%C3%A9ficit_habitacional_cuantitativo_2024/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image&layers=show:1",
         service: "https://geoide.minvu.cl/server/rest/services/Otros/D%C3%A9ficit_habitacional_cuantitativo_2024/MapServer",
         kind: "arcgis",
         layer: "1",
@@ -257,7 +257,7 @@ pub const CATALOG: &[Entry] = &[
     Entry {
         id: "bike-lanes",
         name: "Ciclovías (MINVU)",
-        tiles: "https://geoide.minvu.cl/server/rest/services/Planes_Programas/Ciclov%C3%ADas_Minvu/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image",
+        tiles: "https://geoide.minvu.cl/server/rest/services/Planes_Programas/Ciclov%C3%ADas_Minvu/MapServer/export?bbox={bbox-epsg-3857}&bboxSR=3857&imageSR=3857&size=512,512&format=png32&transparent=true&f=image",
         service: "",
         kind: "arcgis",
         layer: "",

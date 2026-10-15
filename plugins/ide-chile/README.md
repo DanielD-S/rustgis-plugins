@@ -36,11 +36,15 @@ datasets' own names.
 
 A layer comes as a **map image**, as **features**, or both:
 
-- A map image is the service's own rendering (an ArcGIS MapServer `export` request per tile),
-  added as a web tile layer on top of the basemap. Choosing it again takes it away. These work on
-  the desktop, on the command line and in the web app.
+- A map image is the service's own rendering (an ArcGIS MapServer `export` request per 512-pixel
+  tile, from zoom 4 up), added as a web tile layer. Like every web tile layer in RustGIS it is
+  drawn under the map's own layers and listed under **Map › Basemap**, not in the Layers pane;
+  choosing it again takes it away. These work on the desktop, on the command line and in the web
+  app.
 - Features are data: an attribute table, selection, symbology and analysis. They come as GeoJSON
-  from the service, on the desktop, on the command line and in the web app. Small layers (regions,
+  from the service, on the desktop and on the command line. The web app downloads only from its
+  own **Home › Add Data › From URL** dialog, so there a layer that offers both shows its map image
+  and a features-only layer gives the address to paste into that dialog. Small layers (regions,
   census communes, capitals, airports…) are read whole and zoomed to; ArcGIS layers read whole are
   generalised to about 10 m, so national boundaries stay a few megabytes. Large layers (communes, the
   wetlands inventory, hydrography, the road network, census blocks, schools…) are read in the

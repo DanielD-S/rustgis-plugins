@@ -15,6 +15,10 @@ import pathlib
 
 root = pathlib.Path(__file__).resolve().parent
 
+# What each ArcGIS service offers, as read from the services (refresh.py fetches it again): its
+# queryable layers, with their names and Web Mercator extents.
+SERVICES = json.loads((root / "services.json").read_text(encoding="utf-8"))
+
 CIREN = "https://esri.ciren.cl/server/rest/services/IDEMINAGRI/{}/MapServer"
 MINVU = "https://geoide.minvu.cl/server/rest/services/{}/MapServer"
 INE = "https://services5.arcgis.com/hUyD8u3TeZLKPe4T/arcgis/rest/services/{}/FeatureServer"
@@ -34,46 +38,54 @@ def export(base, show=None):
     return t
 
 
-def minagri(id, en, es, help_en, help_es, service, show=None, layer="", whole=False, icon="polygon_layer", name=None):
-    base = CIREN.format(service)
+def subs_of(id, show=None):
+    """An ArcGIS service's queryable layers (the ones in `show`, or all): (id, name, bbox)."""
+    layers = SERVICES[id]["layers"]
+    chosen = [l for l in layers if not show or l["id"] in show]
+    assert chosen, id
+    assert not show or len(chosen) == len(show), (id, show)
+    return [(l["id"], l["name"], l["bbox"] if isinstance(l.get("bbox"), list) else None) for l in chosen]
+
+
+def arcgis(id, en, es, help_en, help_es, base, credit, show=None, whole=False, icon="polygon_layer", name=None, tiles=True):
+    subs = subs_of(id, show)
+    assert not whole or len(subs) == 1, (id, "a layer read whole is one layer")
     return dict(
         id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
-        tiles=export(base, show), service=base if layer else "", kind="arcgis", layer=layer,
-        whole=bool(layer and whole), credit=MINAGRI_CREDIT,
+        tiles=export(base, show) if tiles else "", service=base, kind="arcgis", layer="", subs=subs,
+        whole=whole, credit=credit,
     )
 
 
-def minvu(id, en, es, help_en, help_es, service, show=None, layer="", whole=False, icon="polygon_layer", name=None):
-    base = MINVU.format(service)
-    return dict(
-        id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
-        tiles=export(base, show), service=base if layer else "", kind="arcgis", layer=layer,
-        whole=bool(layer and whole), credit=MINVU_CREDIT,
-    )
+def minagri(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None):
+    return arcgis(id, en, es, help_en, help_es, CIREN.format(service), MINAGRI_CREDIT, show, whole, icon, name)
+
+
+def minvu(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None):
+    return arcgis(id, en, es, help_en, help_es, MINVU.format(service), MINVU_CREDIT, show, whole, icon, name)
 
 
 def ine(id, en, es, help_en, help_es, service, whole=False, icon="polygon_layer", name=None):
-    base = INE.format(service)
-    return dict(
-        id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
-        tiles="", service=base, kind="arcgis", layer="0", whole=whole, credit=INE_CREDIT,
-    )
+    # A hosted feature service draws no map image.
+    return arcgis(id, en, es, help_en, help_es, INE.format(service), INE_CREDIT, None, whole, icon, name, tiles=False)
 
 
 def geoportal(id, en, es, help_en, help_es, workspace, typename, publisher, whole=False, icon="point_layer", name=None):
     return dict(
         id=id, en=en, es=es, help_en=help_en, help_es=help_es, name=name or es, icon=icon,
-        tiles="", service=GEOPORTAL.format(workspace), kind="wfs", layer=f"{workspace}:{typename}",
+        tiles="", service=GEOPORTAL.format(workspace), kind="wfs", layer=f"{workspace}:{typename}", subs=[],
         whole=whole, credit=GEOPORTAL_CREDIT.format(publisher),
     )
 
 
-# The layers, in the order of the ribbon. `whole` marks feature layers small enough to read whole
-# (one request, at most 2,000 ArcGIS features); the others are read in the map view (see lib.rs).
+# The layers, in the order of the ribbon. Every layer is read as features. `whole` marks the ones
+# small enough to read whole (one request, at most 2,000 ArcGIS features); the others are read in
+# the map view, an ArcGIS service's layers that reach the view each as a layer (see lib.rs).
+# `show` picks an ArcGIS service's layers; without it, every queryable layer is offered.
 LAYERS = [
     # Boundaries (IDE MINAGRI)
-    minagri("regions", "Regions", "Regiones", "Regional and international boundaries of Chile (IDE MINAGRI, CIREN). As features: the boundary polygons in the map view, in full detail (Census 2017 › Regions has the 16 regions).", "Límites regionales e internacionales de Chile (IDE MINAGRI, CIREN). Como entidades: los polígonos en la vista del mapa, con todo su detalle (Censo 2017 › Regiones trae las 16 regiones).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[1, 2, 3, 4], layer="4", name="Regiones (IDE MINAGRI)"),
-    minagri("communes", "Communes", "Comunas", "Communal boundaries of Chile (IDE MINAGRI, CIREN). As features: the communes in the map view, in full detail (Census 2017 › Communes has them all).", "Límites comunales de Chile (IDE MINAGRI, CIREN). Como entidades: las comunas en la vista del mapa, con todo su detalle (Censo 2017 › Comunas las trae todas).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[6, 7, 8, 9], layer="9", name="Comunas (IDE MINAGRI)"),
+    minagri("regions", "Regions", "Regiones", "Regional and international boundaries of Chile (IDE MINAGRI, CIREN). As features: the boundary polygons in the map view, in full detail (Census 2017 › Regions has the 16 regions).", "Límites regionales e internacionales de Chile (IDE MINAGRI, CIREN). Como entidades: los polígonos en la vista del mapa, con todo su detalle (Censo 2017 › Regiones trae las 16 regiones).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[1, 2, 3, 4], name="Regiones (IDE MINAGRI)"),
+    minagri("communes", "Communes", "Comunas", "Communal boundaries of Chile (IDE MINAGRI, CIREN). As features: the communes in the map view, in full detail (Census 2017 › Communes has them all).", "Límites comunales de Chile (IDE MINAGRI, CIREN). Como entidades: las comunas en la vista del mapa, con todo su detalle (Censo 2017 › Comunas las trae todas).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[6, 7, 8, 9], name="Comunas (IDE MINAGRI)"),
     # Agriculture and soils (IDE MINAGRI)
     minagri("soils", "Agrological Soils", "Suelos agrológicos", "Land use capability classes of agricultural soils, by region (CIREN agrological studies).", "Clases de capacidad de uso de los suelos agrícolas, por región (estudios agrológicos de CIREN).", "SUELOS_AGROLOGICOS", name="Suelos agrológicos (CIREN)"),
     minagri("land-use", "Land Use (CONAF)", "Uso de la tierra (CONAF)", "CONAF's vegetation and land use cadastre, by region.", "Catastro de uso de la tierra y vegetación de CONAF, por región.", "USO_DE_LA_TIERRA_CUT_CONAF", name="Uso de la tierra (CONAF)"),
@@ -81,25 +93,25 @@ LAYERS = [
     minagri("irrigation", "Irrigation", "Infraestructura de riego", "Irrigation canals, intakes, infrastructure and the reservoir plan.", "Canales de riego, bocatomas, infraestructura y plan de embalses.", "INFRAESTRUCTURA_RIEGO", icon="line_layer", name="Infraestructura de riego (CIREN)"),
     minagri("erosion", "Erosion", "Erosión actual", "Current erosion of soils, by region (CIREN).", "Erosión actual de los suelos, por región (CIREN).", "EROSION", name="Erosión actual (CIREN)"),
     minagri("fruit-cadastre", "Fruit Cadastre", "Catastro frutícola", "Fruit producers, agroindustries, packing plants and cold storage, by region (CIREN).", "Productores frutícolas, agroindustrias, packings y frigoríficos, por región (CIREN).", "CATASTRO_FRUTICOLA", icon="point_layer", name="Catastro frutícola (CIREN)"),
-    minagri("weather-stations", "Weather Stations", "Estaciones meteorológicas", "Agrometeorological stations (2011) and agroclimatic districts and zones.", "Estaciones meteorológicas (2011), distritos y zonas agroclimáticas.", "AGROCLIMA_IDEMINAGRI", show=[7], layer="7", whole=True, icon="point_layer", name="Estaciones meteorológicas (IDE MINAGRI)"),
-    minagri("summer-pastures", "Summer Pastures", "Veranadas", "Summer pastures (veranadas) of the Andes.", "Veranadas de la cordillera.", "VERANADAS", layer="0", whole=True, name="Veranadas (IDE MINAGRI)"),
-    minagri("hunting-ban", "Hunting Ban Areas", "Áreas prohibidas de caza", "Areas where hunting is prohibited (SAG, 2013).", "Áreas prohibidas de caza (SAG, 2013).", "AREAS_PROHIBIDAS_CAZA", layer="0", whole=True, name="Áreas prohibidas de caza (SAG)"),
+    minagri("weather-stations", "Weather Stations", "Estaciones meteorológicas", "Agrometeorological stations (2011) and agroclimatic districts and zones.", "Estaciones meteorológicas (2011), distritos y zonas agroclimáticas.", "AGROCLIMA_IDEMINAGRI", show=[7], whole=True, icon="point_layer", name="Estaciones meteorológicas (IDE MINAGRI)"),
+    minagri("summer-pastures", "Summer Pastures", "Veranadas", "Summer pastures (veranadas) of the Andes.", "Veranadas de la cordillera.", "VERANADAS", whole=True, name="Veranadas (IDE MINAGRI)"),
+    minagri("hunting-ban", "Hunting Ban Areas", "Áreas prohibidas de caza", "Areas where hunting is prohibited (SAG, 2013).", "Áreas prohibidas de caza (SAG, 2013).", "AREAS_PROHIBIDAS_CAZA", whole=True, name="Áreas prohibidas de caza (SAG)"),
     # Environment and hazards
-    minagri("wildfires", "Wildfires 2024–2025", "Incendios 2024–2025", "Forest fires of the 2024–2025 season (CONAF).", "Incendios forestales de la temporada 2024–2025 (CONAF).", "INCENDIOS", layer="0", name="Incendios forestales 2024–2025 (CONAF)"),
-    minagri("ramsar", "Ramsar Wetlands", "Humedales Ramsar", "Ramsar wetlands of Chile (2013).", "Humedales Ramsar de Chile (2013).", "HUMEDALES", layer="0", whole=True, name="Humedales Ramsar"),
+    minagri("wildfires", "Wildfires 2024–2025", "Incendios 2024–2025", "Forest fires of the 2024–2025 season (CONAF).", "Incendios forestales de la temporada 2024–2025 (CONAF).", "INCENDIOS", name="Incendios forestales 2024–2025 (CONAF)"),
+    minagri("ramsar", "Ramsar Wetlands", "Humedales Ramsar", "Ramsar wetlands of Chile (2013).", "Humedales Ramsar de Chile (2013).", "HUMEDALES", whole=True, name="Humedales Ramsar"),
     geoportal("wetlands", "Wetlands (MMA)", "Humedales (MMA)", "The Ministry of the Environment's wetlands inventory. Read in the map view.", "Inventario de humedales del Ministerio del Medio Ambiente. Se lee en la vista del mapa.", "Humedales", "humedales", "MMA", icon="polygon_layer", name="Humedales (MMA)"),
     geoportal("hydrography", "Hydrography", "Hidrografía", "Rivers and water bodies from Arica to O'Higgins (SNIT). Read in the map view.", "Ríos y cuerpos de agua de Arica a O'Higgins (SNIT). Se lee en la vista del mapa.", "Hidrografia", "hidrografa", "SNIT", icon="line_layer", name="Hidrografía (SNIT)"),
     geoportal("basins", "Basins", "Cuencas", "Basins of the National Water Bank (MOP, DGA).", "Cuencas del Banco Nacional de Aguas (MOP, DGA).", "Cuencas_Banco_Nacional_Aguas", "cuencas_banco_nacional_de_aguas", "MOP", whole=True, icon="polygon_layer", name="Cuencas (Banco Nacional de Aguas)"),
     geoportal("aquifers", "Aquifer Restrictions", "Restricción de acuíferos", "Aquifer restriction and prohibition zones (MOP, DGA).", "Zonas de restricción y prohibición de acuíferos (MOP, DGA).", "Restriccion_Prohibicion_Acuiferos", "restriccin_prohibicin_de_acuferos", "MOP", whole=True, icon="polygon_layer", name="Restricción y prohibición de acuíferos (DGA)"),
     geoportal("climate-zones", "Climate Zones", "Zonas climáticas", "Köppen-Geiger climate zones of Chile at 1:1,500,000 (Universidad de Chile): a 26 MB download.", "Zonas climáticas de Chile según Köppen-Geiger a 1:1.500.000 (Universidad de Chile): una descarga de 26 MB.", "Zonas_climaticas_Chile_Koppen_Geiger_escala_1_1500000", "zonas_climticas_de_chile_segn_kppengeiger_escala_11500000", "U. de Chile", whole=True, icon="polygon_layer", name="Zonas climáticas Köppen-Geiger"),
     # Cities and housing (IDE MINVU)
-    minvu("urban-limits", "Urban Limits", "Límites urbanos", "Urban limits of the communal, intercommunal and metropolitan plans (PRC, PRI, PRMS, PREMVAL, PRMC). As features: the PRC limits.", "Límites urbanos de los planes reguladores comunales, intercomunales y metropolitanos (PRC, PRI, PRMS, PREMVAL, PRMC). Como entidades: los límites de PRC.", "IPT/Limites_Urbanos", layer="0", name="Límites urbanos (MINVU)"),
+    minvu("urban-limits", "Urban Limits", "Límites urbanos", "Urban limits of the communal, intercommunal and metropolitan plans (PRC, PRI, PRMS, PREMVAL, PRMC). As features: the PRC limits.", "Límites urbanos de los planes reguladores comunales, intercomunales y metropolitanos (PRC, PRI, PRMS, PREMVAL, PRMC). Como entidades: los límites de PRC.", "IPT/Limites_Urbanos", name="Límites urbanos (MINVU)"),
     minvu("risk-areas", "Risk Areas (IPT)", "Áreas de riesgo (IPT)", "Risk areas of the communal and intercommunal plans.", "Áreas de riesgo de los planes reguladores comunales e intercomunales.", "IPT/IPT_AREA_RIESGO", name="Áreas de riesgo IPT (MINVU)"),
     minvu("heritage", "Heritage", "Patrimonio", "Heritage conservation buildings (ICH) and zones (ZCH).", "Inmuebles (ICH) y zonas (ZCH) de conservación histórica.", "IPT/Patrimonio", name="Patrimonio ICH y ZCH (MINVU)"),
-    minvu("urban-wetlands", "Urban Wetlands", "Humedales urbanos", "The 2020 urban wetlands inventory.", "Inventario de humedales urbanos 2020.", "Inventario_de_Humedales", layer="0", name="Humedales urbanos 2020 (MINVU)"),
-    minvu("settlements", "Informal Settlements", "Campamentos", "The 2026 cadastre of informal settlements (campamentos).", "Catastro de campamentos 2026.", "Catastros/Catastros_campamentos", show=[0], layer="0", whole=True, name="Campamentos 2026 (MINVU)"),
-    minvu("urban-parks", "Urban Parks", "Parques urbanos", "The cadastre of urban parks and their accesses.", "Catastro de parques urbanos y sus accesos.", "Catastros/Catastro_de_parques_urbanos", layer="1", whole=True, name="Parques urbanos (MINVU)"),
-    minvu("housing-deficit", "Housing Deficit 2024", "Déficit habitacional 2024", "Quantitative housing deficit by commune (Census 2024).", "Déficit habitacional cuantitativo por comuna (Censo 2024).", "Otros/D%C3%A9ficit_habitacional_cuantitativo_2024", show=[1], layer="1", name="Déficit habitacional 2024 (MINVU)"),
+    minvu("urban-wetlands", "Urban Wetlands", "Humedales urbanos", "The 2020 urban wetlands inventory.", "Inventario de humedales urbanos 2020.", "Inventario_de_Humedales", name="Humedales urbanos 2020 (MINVU)"),
+    minvu("settlements", "Informal Settlements", "Campamentos", "The 2026 cadastre of informal settlements (campamentos).", "Catastro de campamentos 2026.", "Catastros/Catastros_campamentos", show=[0], whole=True, name="Campamentos 2026 (MINVU)"),
+    minvu("urban-parks", "Urban Parks", "Parques urbanos", "The cadastre of urban parks and their accesses.", "Catastro de parques urbanos y sus accesos.", "Catastros/Catastro_de_parques_urbanos", show=[1], whole=True, name="Parques urbanos (MINVU)"),
+    minvu("housing-deficit", "Housing Deficit 2024", "Déficit habitacional 2024", "Quantitative housing deficit by commune (Census 2024).", "Déficit habitacional cuantitativo por comuna (Censo 2024).", "Otros/D%C3%A9ficit_habitacional_cuantitativo_2024", show=[1], name="Déficit habitacional 2024 (MINVU)"),
     minvu("bike-lanes", "Bike Lanes", "Ciclovías", "Bike lanes built by MINVU, their counters and nearby facilities.", "Ciclovías construidas por el MINVU, sus contadores y equipamientos cercanos.", "Planes_Programas/Ciclov%C3%ADas_Minvu", icon="line_layer", name="Ciclovías (MINVU)"),
     # Census 2017 (INE)
     ine("census-regions", "Regions", "Regiones", "Census 2017 figures by region.", "Cifras del Censo 2017 por región.", "Cifras_Regiones_2017", whole=True, name="Censo 2017: regiones"),
@@ -139,7 +151,7 @@ TAB = [
     ("Manage", "Gestionar", ["clear", "about"]),
 ]
 
-PARAMS = '{"data"?: bool (load the features into a layer instead of the map image, where the service offers both)}'
+PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
 
 # Messages the module builds while it runs (see src/lib.rs), with their Spanish.
 MESSAGES = {
@@ -151,8 +163,9 @@ MESSAGES = {
     "Downloading {name}; it is added when it lands.": "Descargando {name}; se añade cuando termine.",
     "{name} is read in the map view: zoom in to 1:2,000,000 or closer first.": "{name} se lee en la vista del mapa: acerque primero a 1:2.000.000 o más cerca.",
     "Removed {name}.": "Quitada {name}.",
-    "{name} has no map image: it is read as features.": "{name} no tiene imagen de mapa: se lee como entidades.",
-    "{name} offers no features: it is a map image.": "{name} no ofrece entidades: es una imagen de mapa.",
+    "{name} has no map image.": "{name} no tiene imagen de mapa.",
+    "Added {n} layers of {name} in the map view.": "Añadidas {n} capas de {name} en la vista del mapa.",
+    "Nothing of {name} reaches the map view.": "Nada de {name} llega a la vista del mapa.",
     "Removed {n} IDE Chile layers.": "Quitadas {n} capas de IDE Chile.",
     "No IDE Chile map layers to remove.": "No hay capas de mapa de IDE Chile que quitar.",
     "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU and INE. Each layer's credit names its source.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU e INE. El crédito de cada capa nombra su fuente.",
@@ -167,7 +180,7 @@ def main():
     ids = {e["id"] for e in LAYERS}
     assert len(ids) == len(LAYERS), "duplicate ids"
     commands = [command(e) for e in LAYERS] + [
-        {"id": "clear", "label": "Clear IDE Chile", "help": "Removes the IDE Chile map image layers from the map.", "icon": "delete", "params": "{}"},
+        {"id": "clear", "label": "Clear Map Images", "help": "Removes the IDE Chile map images (web tile layers) from the map.", "icon": "delete", "params": "{}"},
         {"id": "about", "label": "About IDE Chile", "help": "The sources behind the layers.", "icon": "help", "params": "{}"},
     ]
     es = {}
@@ -175,8 +188,8 @@ def main():
         es[e["en"]] = e["es"]
         es[e["help_en"]] = e["help_es"]
     es.update({
-        "Clear IDE Chile": "Quitar capas IDE Chile",
-        "Removes the IDE Chile map image layers from the map.": "Quita del mapa las capas de imagen de IDE Chile.",
+        "Clear Map Images": "Quitar imágenes de mapa",
+        "Removes the IDE Chile map images (web tile layers) from the map.": "Quita del mapa las imágenes de mapa (capas de teselas) de IDE Chile.",
         "About IDE Chile": "Acerca de IDE Chile",
         "The sources behind the layers.": "Las fuentes de las capas.",
         "IDE Chile": "IDE Chile",
@@ -223,12 +236,17 @@ def main():
     def s(x):
         return json.dumps(x, ensure_ascii=False)
 
+    def sub(l):
+        bbox = "Some([" + ", ".join(f"{v:.1f}" for v in l[2]) + "])" if l[2] else "None"
+        return f"Sub {{ id: {l[0]}, name: {s(l[1])}, bbox: {bbox} }}"
+
     rows = []
     for e in LAYERS:
+        subs = "&[" + ", ".join(sub(l) for l in e["subs"]) + "]"
         rows.append(
-            f"    Entry {{ id: {s(e['id'])}, name: {s(e['name'])}, tiles: {s(e['tiles'])}, service: {s(e['service'])}, kind: {s(e['kind'])}, layer: {s(e['layer'])}, whole: {'true' if e['whole'] else 'false'}, credit: {s(e['credit'])} }},"
+            f"    Entry {{ id: {s(e['id'])}, name: {s(e['name'])}, tiles: {s(e['tiles'])}, service: {s(e['service'])}, kind: {s(e['kind'])}, layer: {s(e['layer'])}, subs: {subs}, whole: {'true' if e['whole'] else 'false'}, credit: {s(e['credit'])} }},"
         )
-    rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::Entry;\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
+    rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::{Entry, Sub};\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
     (root / "src" / "catalog.rs").write_text(rs, encoding="utf-8")
     print(f"{len(LAYERS)} layers, {len(commands)} commands, {len(es)} Spanish strings")
 

@@ -35,10 +35,10 @@ datasets' own names.
 ## Features, read whole or in the map view
 
 Every layer is added as features: an attribute table, selection, symbology and analysis. They
-come as GeoJSON from the service, on the desktop, on the command line and in the web app (a
-RustGIS from after October 2026, whose `layer.addUrl` downloads off the frame there; older web
-builds fall back to the map image where there is one, or give the address to paste into
-**Home › Add Data › From URL**).
+come as GeoJSON from the service through RustGIS's `layer.addUrl`, on the desktop, on the
+command line and in the web app. That command is newer than RustGIS 0.2.0: on 0.2.0, and on
+a web app older than mid-October 2026, the plugin falls back to the map image where there is one
+and otherwise gives the address to paste into **Home › Add Data › From URL**, saying so.
 
 - Small layers (census communes, capitals, airports, Ramsar wetlands…) are read whole and zoomed
   to; ArcGIS layers read whole are generalised to about 10 m, so national data stays a few

@@ -606,6 +606,8 @@
       "Added {name} (map image, under the layers; Map › Basemap lists it).": "Añadida {name} (imagen del mapa, bajo las capas; Mapa › Mapa base la lista).",
       "In the web app, add {name} with Home › Add Data › From URL and this address: {url}": "En la app web, añada {name} con Inicio › Añadir datos › Desde URL y esta dirección: {url}",
       "In the web app, {name} is shown as a map image; its features need the desktop app.": "En la app web, {name} se muestra como imagen del mapa; sus entidades requieren la app de escritorio.",
+      "This RustGIS can't add data by address from a plugin: update it (0.2.1 or later) for {name}, or add this address with Home › Add Data › From URL: {url}": "Este RustGIS no puede añadir datos por dirección desde un complemento: actualícelo (0.2.1 o posterior) para {name}, o añada esta dirección con Inicio › Añadir datos › Desde URL: {url}",
+      "This RustGIS can't add data by address from a plugin: {name} is shown as a map image. Update RustGIS (0.2.1 or later) for its features.": "Este RustGIS no puede añadir datos por dirección desde un complemento: {name} se muestra como imagen del mapa. Actualice RustGIS (0.2.1 o posterior) para sus entidades.",
       "Added {name}.": "Añadida {name}.",
       "Added {name} in the map view.": "Añadida {name} en la vista del mapa.",
       "Downloading {name}; it is added when it lands.": "Descargando {name}; se añade cuando termine.",

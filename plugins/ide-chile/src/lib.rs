@@ -214,18 +214,32 @@ fn choose(req: &Request, e: &Entry, map: bool) -> Result<Value, String> {
                 pending |= out.get("pending").and_then(Value::as_bool) == Some(true);
                 added.push(out);
             }
-            // A web app that downloads only from its own Add Data dialog, not from a command:
-            // show the map image instead where there is one, else say where the address goes.
-            Err(err) if err.contains("web app") && added.is_empty() => {
+            // A RustGIS that can't add data by address from a command: 0.2.0, which has no
+            // layer.addUrl, or a web app that downloads only from its own Add Data dialog. The
+            // map image instead, where there is one; else the address, for Add Data › From URL.
+            Err(err) if (err.contains("web app") || err.contains("unknown command")) && added.is_empty() => {
+                let old = err.contains("unknown command");
                 if e.tiles.is_empty() {
                     return Err(req.tr(
                         MANIFEST,
-                        "In the web app, add {name} with Home › Add Data › From URL and this address: {url}",
+                        if old {
+                            "This RustGIS can't add data by address from a plugin: update it (0.2.1 or later) for {name}, or add this address with Home › Add Data › From URL: {url}"
+                        } else {
+                            "In the web app, add {name} with Home › Add Data › From URL and this address: {url}"
+                        },
                         &[("name", e.name), ("url", url)],
                     ));
                 }
                 let out = host::run("map.addTiles", tiles_params(e))?;
-                host::notify(&req.tr(MANIFEST, "In the web app, {name} is shown as a map image; its features need the desktop app.", name));
+                host::notify(&req.tr(
+                    MANIFEST,
+                    if old {
+                        "This RustGIS can't add data by address from a plugin: {name} is shown as a map image. Update RustGIS (0.2.1 or later) for its features."
+                    } else {
+                        "In the web app, {name} is shown as a map image; its features need the desktop app."
+                    },
+                    name,
+                ));
                 return Ok(out);
             }
             Err(err) => return Err(err),

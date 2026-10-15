@@ -175,7 +175,16 @@ fn choose(req: &Request, e: &Entry, data: bool) -> Result<Value, String> {
             }
             Err(err) => return Err(err),
         };
-        host::notify(&req.tr(MANIFEST, if e.whole { "Added {name}." } else { "Added {name} in the map view." }, name));
+        // A RustGIS that downloads off the frame (the web app, from 0.2.1) answers "pending": the
+        // layer is added when the download lands.
+        let text = if out.get("pending").and_then(Value::as_bool) == Some(true) {
+            "Downloading {name}; it is added when it lands."
+        } else if e.whole {
+            "Added {name}."
+        } else {
+            "Added {name} in the map view."
+        };
+        host::notify(&req.tr(MANIFEST, text, name));
         return Ok(out);
     }
     // A map image already on the map is taken away again.

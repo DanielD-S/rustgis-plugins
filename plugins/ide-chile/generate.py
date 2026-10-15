@@ -148,6 +148,7 @@ MESSAGES = {
     "In the web app, {name} is shown as a map image; its features need the desktop app.": "En la app web, {name} se muestra como imagen del mapa; sus entidades requieren la app de escritorio.",
     "Added {name}.": "Añadida {name}.",
     "Added {name} in the map view.": "Añadida {name} en la vista del mapa.",
+    "Downloading {name}; it is added when it lands.": "Descargando {name}; se añade cuando termine.",
     "{name} is read in the map view: zoom in to 1:2,000,000 or closer first.": "{name} se lee en la vista del mapa: acerque primero a 1:2.000.000 o más cerca.",
     "Removed {name}.": "Quitada {name}.",
     "{name} has no map image: it is read as features.": "{name} no tiene imagen de mapa: se lee como entidades.",

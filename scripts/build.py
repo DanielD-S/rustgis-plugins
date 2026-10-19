@@ -178,6 +178,77 @@ def wasm_interface(data: bytes) -> tuple[set[str], list[str]]:
     return exports, imports
 
 
+def wasm_data(data: bytes) -> bytes:
+    """Returns the bytes of a WebAssembly module's data segments (its string literals), joined."""
+    if data[:4] != b"\0asm":
+        raise ValueError("not a WebAssembly module")
+    i, out = 8, []
+    while i < len(data):
+        sid = data[i]
+        size, i = leb(data, i + 1)
+        end = i + size
+        if sid == 11:  # data
+            count, j = leb(data, i)
+            for _ in range(count):
+                flags, j = leb(data, j)
+                if flags == 2:  # explicit memory index
+                    _, j = leb(data, j)
+                if flags in (0, 2):  # offset expression: constants, globals and arithmetic, then end
+                    while data[j] != 0x0B:
+                        op = data[j]
+                        j += 1
+                        if op in (0x23, 0x41, 0x42):  # global.get, i32.const, i64.const
+                            _, j = leb(data, j)
+                        elif op not in (0x6A, 0x6B, 0x6C, 0x7C, 0x7D, 0x7E):  # i32/i64 add, sub, mul
+                            raise ValueError(f"unsupported data segment offset instruction 0x{op:02x}")
+                    j += 1
+                elif flags != 1:
+                    raise ValueError(f"unknown data segment kind {flags}")
+                n, j = leb(data, j)
+                out.append(data[j : j + n])
+                j += n
+        i = end
+    return b"\0".join(out)
+
+
+COMMANDS = ROOT / "scripts" / "rustgis-commands.txt"
+URL_RE = re.compile(rb"https?://[!#-~]{3,}")
+
+
+MAX_URLS = 100
+
+
+def module_strings(data: bytes, known: list[str]) -> tuple[list[str], list[str], int]:
+    """Returns (the RustGIS command ids, the URLs, how many URLs in all) a module's data segments
+    name. Rust packs its string literals end to end with no separator, so an id counts where no
+    longer known id starts at the same place (`layer.addData` hides `layer.add` there), and a URL
+    may run into the string after it."""
+    seg = wasm_data(data)
+    longer = {cid: [k.encode() for k in known if k != cid and k.startswith(cid)] for cid in known}
+    found = set()
+    for cid in known:
+        # Bounded, so a module repeating a longer id can't make the scan crawl; one that hits the
+        # bound counts as naming the id, so the repeats can't hide it either.
+        at, tries = seg.find(cid.encode()), 0
+        while at != -1:
+            if tries == 1000 or not any(seg.startswith(k, at) for k in longer[cid]):
+                found.add(cid)
+                break
+            at, tries = seg.find(cid.encode(), at + 1), tries + 1
+    urls = sorted({m.group().decode("ascii")[:200] for m in URL_RE.finditer(seg)})
+    return sorted(found), urls[:MAX_URLS], len(urls)
+
+
+def known_commands() -> list[str]:
+    try:
+        lines = COMMANDS.read_text().splitlines()
+    except OSError:
+        return []
+    # A one-word id (`identify`) matches ordinary text too often to say anything.
+    stripped = (ln.strip() for ln in lines)
+    return [ln for ln in stripped if "." in ln and not ln.startswith("#")]
+
+
 # --------------------------------------------------------------------------------------------
 # Manifests and packages
 
@@ -446,9 +517,11 @@ def published(url: str) -> bytes | None:
 def inspect(checkout: Path, out: Path, files: list[str]) -> int:
     """For code review: downloads the package each changed registry entry with a `source` points
     at, checks its SHA-256, and writes what it holds to <out>/plugins/<id>/ (plugin.json, README,
-    module interface) and a summary to <out>/report.md. Packages are read as data, never run."""
+    module interface, the commands and URLs its strings name, the module itself) and a summary to
+    <out>/report.md. Packages are read as data, never run."""
     out.mkdir(parents=True, exist_ok=True)
     rows, notes = [], []
+    known = known_commands()
     for f in files:
         try:
             reg = json.loads((checkout / f).read_text())
@@ -488,15 +561,32 @@ def inspect(checkout: Path, out: Path, files: list[str]) -> int:
             exports, imports = wasm_interface(wasm)
         except (ValueError, IndexError) as e:
             exports, imports = set(), [f"unreadable: {e}"]
+        try:
+            commands, urls, n_urls = module_strings(wasm, known)
+            named = ", ".join(commands) or "none"
+            listed = ", ".join(f"`{c}`" for c in commands) or "none"
+            if not known:
+                named = listed = f"unknown: the command list {COMMANDS.name} is missing or empty"
+        except (ValueError, IndexError) as e:
+            urls, n_urls = [], 0
+            named = f"(the module's strings could not be read: {e})"
+            listed = "**strings unreadable**"
+            notes.append(f"- `{pid}`: the module's strings could not be read ({e}), so the commands and URLs it names are unknown")
+        if n_urls > len(urls):
+            urls.append(f"({n_urls - len(urls)} more not shown)")
+        # The module itself, for the workflow to disassemble (wasm2wat) when it is small enough.
+        (dest / "module.wasm").write_bytes(wasm)
         (dest / "module.txt").write_text(
             "exports: " + ", ".join(sorted(exports)) + "\nimports: " + ", ".join(imports) + "\nfiles: " + ", ".join(names) + "\n"
+            + "commands named in strings (not those built at run time): " + named + "\n"
+            + "URLs named:\n" + "".join(f"  {u}\n" for u in urls)
         )
         rows.append(
-            f"| `{pid}` | {manifest.get('version')} | {len(data):,} B | {len(wasm):,} B | {', '.join(manifest.get('permissions', [])) or 'none'} | {', '.join(imports) or 'none'} |"
+            f"| `{pid}` | {manifest.get('version')} | {len(data):,} B | {len(wasm):,} B | {', '.join(manifest.get('permissions', [])) or 'none'} | {', '.join(imports) or 'none'} | {listed} |"
         )
     report = ["# Packages this PR points at", ""]
     if rows:
-        report += ["| id | version | package | module | permissions | module imports |", "|---|---|---|---|---|---|", *rows, ""]
+        report += ["| id | version | package | module | permissions | module imports | commands named in strings |", "|---|---|---|---|---|---|---|", *rows, ""]
     report += notes or ["All changed entries with a source were inspected."]
     (out / "report.md").write_text("\n".join(report) + "\n")
     print("\n".join(report))

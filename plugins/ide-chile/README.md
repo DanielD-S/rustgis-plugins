@@ -4,10 +4,10 @@ Public geospatial services of Chile as one-click layers for RustGIS: the
 [Geoportal de Chile](https://www.geoportal.cl) (the national node of IDE Chile),
 [IDE MINAGRI](https://ide.minagri.gob.cl) (the Ministry of Agriculture, served by CIREN),
 [IDE MINVU](https://ide.minvu.cl) (the Ministry of Housing and Urbanism) and the
-[INE](https://geoine-ine-chile.opendata.arcgis.com)'s Census 2017.
+[INE](https://geoine-ine-chile.opendata.arcgis.com)'s Censuses 2024 and 2017.
 
 Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools,
-health and tourism: 49 layers in a ribbon tab of their own, each a command that scripts, the
+health and tourism: 55 layers in a ribbon tab of their own, each a command that scripts, the
 command line and the AI Assistant can run too.
 
 ## Its tab
@@ -22,7 +22,9 @@ command line and the AI Assistant can run too.
   MMA wetlands inventory, hydrography, basins, aquifer restrictions, Köppen-Geiger climate zones
 - **Cities**: **Cities & Housing ▾** (8): urban limits, IPT risk areas, heritage, urban
   wetlands, informal settlements, urban parks, housing deficit 2024, bike lanes (IDE MINVU)
-- **Census**: **Census 2017 ▾** (9): regions, provinces, communes, blocks, localities, cities,
+- **Census**: **Census 2024 ▾** (6): regions, provinces and communes of the political-administrative
+  division the census was taken on, indicators by commune and by region, neighbourhood units with
+  their figures; **Census 2017 ▾** (9): regions, provinces, communes, blocks, localities, cities,
   towns, villages, hamlets (INE)
 - **Services**: **Transport & Services ▾** (14): roads, railways, airports, schools, preschools,
   higher education, health services, police stations, municipalities, capitals, tourist
@@ -58,19 +60,19 @@ and otherwise gives the address to paste into **Home › Add Data › From URL**
   Images** removes them all.
 
 ```sh
-rustgis-cli run --plugin ide-chile-0.1.0.rgplugin   --cmd 'map.goToXY={"x":-70.65,"y":-33.45}' --cmd 'map.setScale={"scale":300000}'   --cmd 'plugin:ide-chile/communes'   --cmd 'plugin:ide-chile/soils'   --cmd 'plugin:ide-chile/census-communes'   --cmd 'plugin:ide-chile/regions={"map":true}'   --cmd 'share.exportMap={"path":"santiago.png"}'
+rustgis-cli run --plugin ide-chile-0.2.0.rgplugin   --cmd 'map.goToXY={"x":-70.65,"y":-33.45}' --cmd 'map.setScale={"scale":300000}'   --cmd 'plugin:ide-chile/communes'   --cmd 'plugin:ide-chile/soils'   --cmd 'plugin:ide-chile/census-2024-communes'   --cmd 'plugin:ide-chile/regions={"map":true}'   --cmd 'share.exportMap={"path":"santiago.png"}'
 ```
 
 ## Sources and terms
 
-Every address was checked against the live service on 2026-10-15. Each layer shows its source as
+Every address was checked against the live service on 2026-10-15 (the Census 2024 ones on 2026-10-19). Each layer shows its source as
 its credit, and the data stays under its publisher's terms:
 
 | Source | Service | Layers |
 |---|---|---|
 | [IDE MINAGRI](https://ide.minagri.gob.cl/geoweb/directorio-de-servicios/) | CIREN's ArcGIS Server (`esri.ciren.cl`) | boundaries, soils, land use, properties, irrigation, erosion, fruit cadastre, agroclimate, wildfires, Ramsar wetlands, hunting ban areas |
 | [IDE MINVU](https://ide.minvu.cl) | ArcGIS Server (`geoide.minvu.cl`) | urban limits, risk areas, heritage, urban wetlands, settlements, parks, housing deficit, bike lanes |
-| [INE](https://geoine-ine-chile.opendata.arcgis.com) | ArcGIS Online feature services | Census 2017 |
+| [INE](https://geoine-ine-chile.opendata.arcgis.com) | ArcGIS Online feature services | Census 2024, Census 2017 |
 | [Geoportal de Chile](https://www.geoportal.cl) | GeoServer WFS (`geoportal.cl/geoserver`) | wetlands (MMA), hydrography, basins, aquifers, climate zones, roads, railways, airports, schools, health, police, municipalities, capitals, tourism, street markets, sports, Sendero de Chile |
 
 The Geoportal de Chile's WMS layers are published in EPSG:4326 only, which RustGIS's tile layers

@@ -27,6 +27,7 @@ GEOPORTAL = "https://geoportal.cl/geoserver/{}/wfs"
 MINAGRI_CREDIT = "IDE MINAGRI / CIREN (esri.ciren.cl)"
 MINVU_CREDIT = "IDE MINVU (geoide.minvu.cl)"
 INE_CREDIT = "INE, Censo 2017 (geoine-ine-chile.opendata.arcgis.com)"
+INE_2024_CREDIT = "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)"
 GEOPORTAL_CREDIT = "Geoportal de Chile, IDE Chile ({})"
 
 
@@ -65,9 +66,13 @@ def minvu(id, en, es, help_en, help_es, service, show=None, whole=False, icon="p
     return arcgis(id, en, es, help_en, help_es, MINVU.format(service), MINVU_CREDIT, show, whole, icon, name)
 
 
-def ine(id, en, es, help_en, help_es, service, whole=False, icon="polygon_layer", name=None):
+def ine(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None, credit=INE_CREDIT):
     # A hosted feature service draws no map image.
-    return arcgis(id, en, es, help_en, help_es, INE.format(service), INE_CREDIT, None, whole, icon, name, tiles=False)
+    return arcgis(id, en, es, help_en, help_es, INE.format(service), credit, show, whole, icon, name, tiles=False)
+
+
+def ine_2024(id, en, es, help_en, help_es, service, show=None, whole=False, icon="polygon_layer", name=None):
+    return ine(id, en, es, help_en, help_es, service, show, whole, icon, name, credit=INE_2024_CREDIT)
 
 
 def geoportal(id, en, es, help_en, help_es, workspace, typename, publisher, whole=False, icon="point_layer", name=None):
@@ -84,8 +89,8 @@ def geoportal(id, en, es, help_en, help_es, workspace, typename, publisher, whol
 # `show` picks an ArcGIS service's layers; without it, every queryable layer is offered.
 LAYERS = [
     # Boundaries (IDE MINAGRI)
-    minagri("regions", "Regions", "Regiones", "Regional and international boundaries of Chile (IDE MINAGRI, CIREN). As features: the boundary polygons in the map view, in full detail (Census 2017 › Regions has the 16 regions).", "Límites regionales e internacionales de Chile (IDE MINAGRI, CIREN). Como entidades: los polígonos en la vista del mapa, con todo su detalle (Censo 2017 › Regiones trae las 16 regiones).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[1, 2, 3, 4], name="Regiones (IDE MINAGRI)"),
-    minagri("communes", "Communes", "Comunas", "Communal boundaries of Chile (IDE MINAGRI, CIREN). As features: the communes in the map view, in full detail (Census 2017 › Communes has them all).", "Límites comunales de Chile (IDE MINAGRI, CIREN). Como entidades: las comunas en la vista del mapa, con todo su detalle (Censo 2017 › Comunas las trae todas).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[6, 7, 8, 9], name="Comunas (IDE MINAGRI)"),
+    minagri("regions", "Regions", "Regiones", "Regional and international boundaries of Chile (IDE MINAGRI, CIREN). As features: the boundary polygons in the map view, in full detail (Census 2024 › Regions has the 16 regions).", "Límites regionales e internacionales de Chile (IDE MINAGRI, CIREN). Como entidades: los polígonos en la vista del mapa, con todo su detalle (Censo 2024 › Regiones trae las 16 regiones).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[1, 2, 3, 4], name="Regiones (IDE MINAGRI)"),
+    minagri("communes", "Communes", "Comunas", "Communal boundaries of Chile (IDE MINAGRI, CIREN). As features: the communes in the map view, in full detail (Census 2024 › Communes has them all).", "Límites comunales de Chile (IDE MINAGRI, CIREN). Como entidades: las comunas en la vista del mapa, con todo su detalle (Censo 2024 › Comunas las trae todas).", "LIMITES_ADMINISTRATIVOS_MINAGRI", show=[6, 7, 8, 9], name="Comunas (IDE MINAGRI)"),
     # Agriculture and soils (IDE MINAGRI)
     minagri("soils", "Agrological Soils", "Suelos agrológicos", "Land use capability classes of agricultural soils, by region (CIREN agrological studies).", "Clases de capacidad de uso de los suelos agrícolas, por región (estudios agrológicos de CIREN).", "SUELOS_AGROLOGICOS", name="Suelos agrológicos (CIREN)"),
     minagri("land-use", "Land Use (CONAF)", "Uso de la tierra (CONAF)", "CONAF's vegetation and land use cadastre, by region.", "Catastro de uso de la tierra y vegetación de CONAF, por región.", "USO_DE_LA_TIERRA_CUT_CONAF", name="Uso de la tierra (CONAF)"),
@@ -113,6 +118,14 @@ LAYERS = [
     minvu("urban-parks", "Urban Parks", "Parques urbanos", "The cadastre of urban parks and their accesses.", "Catastro de parques urbanos y sus accesos.", "Catastros/Catastro_de_parques_urbanos", show=[1], whole=True, name="Parques urbanos (MINVU)"),
     minvu("housing-deficit", "Housing Deficit 2024", "Déficit habitacional 2024", "Quantitative housing deficit by commune (Census 2024).", "Déficit habitacional cuantitativo por comuna (Censo 2024).", "Otros/D%C3%A9ficit_habitacional_cuantitativo_2024", show=[1], name="Déficit habitacional 2024 (MINVU)"),
     minvu("bike-lanes", "Bike Lanes", "Ciclovías", "Bike lanes built by MINVU, their counters and nearby facilities.", "Ciclovías construidas por el MINVU, sus contadores y equipamientos cercanos.", "Planes_Programas/Ciclov%C3%ADas_Minvu", icon="line_layer", name="Ciclovías (MINVU)"),
+    # Census 2024 (INE): the political-administrative division (DPA) the census was taken on, its
+    # indicators by commune and region, and the neighbourhood units with their figures.
+    ine_2024("census-2024-regions", "Regions", "Regiones", "The 16 regions of the Census 2024 political-administrative division (INE): a 10 MB download.", "Las 16 regiones de la división político-administrativa del Censo 2024 (INE): una descarga de 10 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[2], whole=True, name="Censo 2024: regiones"),
+    ine_2024("census-2024-provinces", "Provinces", "Provincias", "The 56 provinces of the Census 2024 political-administrative division (INE): a 27 MB download.", "Las 56 provincias de la división político-administrativa del Censo 2024 (INE): una descarga de 27 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[3], whole=True, name="Censo 2024: provincias"),
+    ine_2024("census-2024-communes", "Communes", "Comunas", "The communes of the Census 2024 political-administrative division, with their CUT codes (INE): a 25 MB download.", "Las comunas de la división político-administrativa del Censo 2024, con su código único territorial (INE): una descarga de 25 MB.", "L%C3%ADmites_DPA___Censo_2024", show=[4], whole=True, name="Censo 2024: comunas"),
+    ine_2024("census-2024-commune-indicators", "Commune Indicators", "Indicadores por comuna", "Census 2024 indicators by commune (INE): dwellings, households, population by sex and age group, ageing index.", "Indicadores del Censo 2024 por comuna (INE): viviendas, hogares, población por sexo y grupo de edad, índice de envejecimiento.", "CENSO2024_V2_gdb", show=[0], whole=True, icon="stats", name="Censo 2024: indicadores por comuna"),
+    ine_2024("census-2024-region-indicators", "Region Indicators", "Indicadores por región", "Census 2024 indicators by region (INE): dwellings, households, population by sex and age group, ageing index.", "Indicadores del Censo 2024 por región (INE): viviendas, hogares, población por sexo y grupo de edad, índice de envejecimiento.", "CENSO2024_V2_gdb", show=[1], whole=True, icon="stats", name="Censo 2024: indicadores por región"),
+    ine_2024("census-2024-neighbourhoods", "Neighbourhood Units", "Unidades vecinales", "Census 2024 figures by neighbourhood unit (unidad vecinal, INE): population by age, migration, indigenous peoples, commuting, schooling and housing. Read in the map view, up to 2,000 at a time.", "Cifras del Censo 2024 por unidad vecinal (INE): población por edad, migración, pueblos originarios, transporte, escolaridad y vivienda. Se lee en la vista del mapa, hasta 2.000 por vez.", "UV_Nacional", name="Censo 2024: unidades vecinales"),
     # Census 2017 (INE)
     ine("census-regions", "Regions", "Regiones", "Census 2017 figures by region.", "Cifras del Censo 2017 por región.", "Cifras_Regiones_2017", whole=True, name="Censo 2017: regiones"),
     ine("census-provinces", "Provinces", "Provincias", "Census 2017 figures by province.", "Cifras del Censo 2017 por provincia.", "Cifras_Provincias_2017", whole=True, name="Censo 2017: provincias"),
@@ -146,7 +159,7 @@ TAB = [
     ("Agriculture", "Agricultura", [("Soils & Agriculture", "Suelos y agricultura", "polygon_layer", "Soils, land use, properties, irrigation and crops (IDE MINAGRI).", "Suelos, uso de la tierra, propiedades, riego y cultivos (IDE MINAGRI).", ["soils", "land-use", "rural-properties", "irrigation", "erosion", "fruit-cadastre", "weather-stations", "summer-pastures", "hunting-ban"])]),
     ("Environment", "Medio ambiente", [("Environment & Hazards", "Medio ambiente y riesgos", "relief", "Wildfires, wetlands, water and climate.", "Incendios, humedales, aguas y clima.", ["wildfires", "ramsar", "wetlands", "hydrography", "basins", "aquifers", "climate-zones"])]),
     ("Cities", "Ciudades", [("Cities & Housing", "Ciudades y vivienda", "polygon_layer", "Urban planning and housing layers (IDE MINVU).", "Capas de planificación urbana y vivienda (IDE MINVU).", ["urban-limits", "risk-areas", "heritage", "urban-wetlands", "settlements", "urban-parks", "housing-deficit", "bike-lanes"])]),
-    ("Census", "Censo", [("Census 2017", "Censo 2017", "stats", "Census 2017 figures and microdata (INE).", "Cifras y microdatos del Censo 2017 (INE).", ["census-regions", "census-provinces", "census-communes", "census-blocks", "census-localities", "census-cities", "census-towns", "census-villages", "census-hamlets"])]),
+    ("Census", "Censo", [("Census 2024", "Censo 2024", "stats", "Census 2024 boundaries, indicators and neighbourhood units (INE).", "Límites, indicadores y unidades vecinales del Censo 2024 (INE).", ["census-2024-regions", "census-2024-provinces", "census-2024-communes", "census-2024-commune-indicators", "census-2024-region-indicators", "census-2024-neighbourhoods"]), ("Census 2017", "Censo 2017", "stats", "Census 2017 figures and microdata (INE).", "Cifras y microdatos del Censo 2017 (INE).", ["census-regions", "census-provinces", "census-communes", "census-blocks", "census-localities", "census-cities", "census-towns", "census-villages", "census-hamlets"])]),
     ("Services", "Servicios", [("Transport & Services", "Transporte y servicios", "point_layer", "Roads, railways, airports, schools, health, police and tourism (Geoportal de Chile).", "Red vial, ferrocarriles, aeródromos, escuelas, salud, Carabineros y turismo (Geoportal de Chile).", ["roads", "railways", "airports", "schools", "preschools", "higher-education", "health-services", "police", "municipalities", "capitals", "tourist-attractions", "street-markets", "sports", "sendero"])]),
     ("Manage", "Gestionar", ["clear", "about"]),
 ]
@@ -195,7 +208,7 @@ def main():
         "About IDE Chile": "Acerca de IDE Chile",
         "The sources behind the layers.": "Las fuentes de las capas.",
         "IDE Chile": "IDE Chile",
-        "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Census 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.": "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y el Censo 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables.",
+        "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.": "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y los Censos 2024 y 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables.",
     })
     es.update(MESSAGES)
     groups = []
@@ -219,8 +232,8 @@ def main():
     manifest = {
         "id": "ide-chile",
         "name": "IDE Chile",
-        "version": "0.1.0",
-        "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Census 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.",
+        "version": "0.2.0",
+        "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.",
         "author": "Daniel Díaz",
         "homepage": "https://github.com/opengeos/rustgis-plugins/tree/main/plugins/ide-chile",
         "license": "MIT",

@@ -17,7 +17,7 @@ for the design, the permissions and the ABI.
 | [`plugins/vector-toolkit/`](plugins/vector-toolkit) | **Vector Toolkit**: hexagon and square grids, random points in polygons |
 | [`plugins/basemaps/`](plugins/basemaps) | **Basemaps**: a tab of keyless public basemaps (OpenStreetMap, Esri, USGS, NASA, OpenFreeMap and VersaTiles vector maps) and overlays |
 | [`plugins/map-explorer/`](plugins/map-explorer) | **Map Explorer**: a ribbon tab of its own (groups, a menu, a tool button) for jumping around the map, selecting and summarizing |
-| [`plugins/ide-chile/`](plugins/ide-chile) | **IDE Chile**: the public geospatial services of Chile (Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE Census 2017) as one-click layers, map images or features, in a tab of their own |
+| [`plugins/ide-chile/`](plugins/ide-chile) | **IDE Chile**: the public geospatial services of Chile (Geoportal de Chile, IDE MINAGRI, IDE MINVU, INE Censuses 2024 and 2017) as one-click layers, map images or features, in a tab of their own |
 | [`registry/`](registry) | one file per listed plugin |
 | [`blocklist.json`](blocklist.json) | withdrawn plugins |
 | [`scripts/build.py`](scripts/build.py) | builds, checks and packages what changed into `dist/` |

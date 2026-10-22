@@ -780,6 +780,17 @@ fn properties(f: &Value) -> Map<String, Value> {
     f.get("properties").and_then(Value::as_object).cloned().unwrap_or_default()
 }
 
+/// The features of the layer a tool parameter names, taken out of the request rather than
+/// copied: a tool reads each layer once, and the result is built by moving its features.
+fn take_features(req: &mut Request, param: &str) -> Result<Vec<Value>, String> {
+    let name = req.str(param).ok_or_else(|| format!("'{param}' is required"))?.to_string();
+    let mut layer = req.layers.remove(&name).ok_or_else(|| format!("no layer named '{name}'"))?;
+    Ok(match layer.get_mut("features").map(Value::take) {
+        Some(Value::Array(features)) => features,
+        _ => Vec::new(),
+    })
+}
+
 /// The fields of a layer's features (the first 500), in order of appearance, with their values
 /// as columns.
 fn layer_columns(features: &[Value]) -> Vec<(String, Vec<&Value>)> {
@@ -884,7 +895,8 @@ pub fn run(req: &mut Request) -> Result<Value, String> {
 /// Join Table by CUT.
 fn join(req: &mut Request) -> Result<Value, String> {
     let layer_name = req.str("layer").unwrap_or("layer").to_string();
-    let features: Vec<Value> = req.features("layer")?.to_vec();
+    let features = take_features(req, "layer")?;
+    let all_features = features.len();
     if features.is_empty() {
         return Err(tr(req, "{name} has no features.", &[("name", &layer_name)]));
     }
@@ -976,8 +988,8 @@ fn join(req: &mut Request) -> Result<Value, String> {
         produced.insert(field.clone());
         targets.push(Some(field));
     }
-    for f in &features {
-        let mut props = properties(f);
+    for mut f in features {
+        let mut props = properties(&f);
         let key = props.get(&layer_field).cloned().unwrap_or(Value::Null);
         let row = index.resolve(&key, level).ok().and_then(|(place, _)| by_place.get(&place).copied());
         if row.is_none() {
@@ -998,9 +1010,8 @@ fn join(req: &mut Request) -> Result<Value, String> {
             };
             props.insert(field.clone(), value);
         }
-        let mut g = f.clone();
-        g["properties"] = Value::Object(props);
-        out_features.push(g);
+        f["properties"] = Value::Object(props);
+        out_features.push(f);
     }
 
     // The rows no feature took.
@@ -1040,7 +1051,7 @@ fn join(req: &mut Request) -> Result<Value, String> {
                 ("n", &(total - unmatched_rows.len()).to_string()),
                 ("total", &total.to_string()),
                 ("features", &joined.to_string()),
-                ("all", &features.len().to_string()),
+                ("all", &all_features.to_string()),
             ],
         ));
     if old_codes > 0 {
@@ -1075,8 +1086,9 @@ fn join(req: &mut Request) -> Result<Value, String> {
 /// Assign Commune to Points.
 fn assign(req: &mut Request) -> Result<Value, String> {
     let points_name = req.str("points").unwrap_or("points").to_string();
-    let points: Vec<Value> = req.features("points")?.to_vec();
-    let polygons: Vec<Value> = req.features("communes")?.to_vec();
+    let points = take_features(req, "points")?;
+    let total = points.len();
+    let polygons = take_features(req, "communes")?;
     let only = Level::from_param(req.str("level"));
     let index = Index::new();
     if polygons.is_empty() {
@@ -1103,8 +1115,8 @@ fn assign(req: &mut Request) -> Result<Value, String> {
     let mut any_overlap = false;
     let (rings, codes): (Vec<Rings>, Vec<Place>) = places.into_iter().unzip();
     let grid = Grid::new(&rings);
-    for f in &points {
-        let mut props = properties(f);
+    for mut f in points {
+        let mut props = properties(&f);
         let p = f.get("geometry").and_then(position);
         let hit = match (p, &grid) {
             (Some(p), Some(grid)) => {
@@ -1126,11 +1138,9 @@ fn assign(req: &mut Request) -> Result<Value, String> {
                 }
             }
         }
-        let mut g = f.clone();
-        g["properties"] = Value::Object(props);
-        out_features.push(g);
+        f["properties"] = Value::Object(props);
+        out_features.push(f);
     }
-    let total = points.len();
     let mut out = ToolOutput::new()
         .layer(&format!("{points_name} ({})", tr(req, "With commune", &[])), geojson::collection(out_features))
         .message(tr(req, "Level: {level}. Key field: {field}.", &[("level", &tr(req, level.word(), &[])), ("field", &field)]))
@@ -1148,7 +1158,8 @@ fn assign(req: &mut Request) -> Result<Value, String> {
 /// Complete CUT.
 fn complete(req: &mut Request) -> Result<Value, String> {
     let layer_name = req.str("layer").unwrap_or("layer").to_string();
-    let features: Vec<Value> = req.features("layer")?.to_vec();
+    let features = take_features(req, "layer")?;
+    let total = features.len();
     let only = Level::from_param(req.str("level"));
     let index = Index::new();
     let words = Words::new(req);
@@ -1163,8 +1174,8 @@ fn complete(req: &mut Request) -> Result<Value, String> {
     let fields = Place::field_names(level);
     let mut out_features = Vec::with_capacity(features.len());
     let (mut matched, mut old_codes, mut aliases) = (0, 0, 0);
-    for f in &features {
-        let mut props = properties(f);
+    for mut f in features {
+        let mut props = properties(&f);
         let key = props.get(&field).cloned().unwrap_or(Value::Null);
         let mut note = Value::Null;
         let mut new: Vec<(&str, Value)> = Vec::new();
@@ -1197,11 +1208,9 @@ fn complete(req: &mut Request) -> Result<Value, String> {
             props.insert(k.to_string(), v);
         }
         props.insert("CUT_NOTA".to_string(), note);
-        let mut g = f.clone();
-        g["properties"] = Value::Object(props);
-        out_features.push(g);
+        f["properties"] = Value::Object(props);
+        out_features.push(f);
     }
-    let total = features.len();
     let mut out = ToolOutput::new()
         .layer(&format!("{layer_name} ({})", tr(req, "Completed", &[])), geojson::collection(out_features))
         .message(tr(req, "Level: {level}. Key field: {field}.", &[("level", &tr(req, level.word(), &[])), ("field", &field)]))

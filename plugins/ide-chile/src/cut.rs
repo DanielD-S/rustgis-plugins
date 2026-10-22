@@ -950,41 +950,53 @@ fn join(req: &mut Request) -> Result<Value, String> {
     let mut out_features = Vec::with_capacity(features.len());
     let mut joined = 0;
     let mut features_without = 0;
-    // Table columns the layer already had a field of, with the name they got.
-    let mut renamed = std::collections::BTreeSet::new();
+    // The field each table column lands in, decided once so every feature gets the same ones:
+    // its own name, or <name>_2 (then _2_2…) when the layer has a field of that name, another
+    // column is called that, or an earlier column already landed there.
+    let layer_fields: std::collections::HashSet<&str> =
+        features.iter().filter_map(|f| f.get("properties").and_then(Value::as_object)).flat_map(|p| p.keys().map(String::as_str)).collect();
+    let mut produced: std::collections::HashSet<String> = std::collections::HashSet::new();
+    let mut targets: Vec<Option<String>> = Vec::with_capacity(table.columns.len());
+    let mut renamed: Vec<String> = Vec::new();
+    for (c, name) in table.columns.iter().enumerate() {
+        if c == key_i {
+            targets.push(None);
+            continue;
+        }
+        let mut field = name.clone();
+        while layer_fields.contains(field.as_str())
+            || produced.contains(&field)
+            || (field != *name && table.columns.iter().enumerate().any(|(o, n)| o != c && o != key_i && *n == field))
+        {
+            field.push_str("_2");
+        }
+        if field != *name {
+            renamed.push(format!("{name} → {field}"));
+        }
+        produced.insert(field.clone());
+        targets.push(Some(field));
+    }
     for f in &features {
         let mut props = properties(f);
         let key = props.get(&layer_field).cloned().unwrap_or(Value::Null);
         let row = index.resolve(&key, level).ok().and_then(|(place, _)| by_place.get(&place).copied());
-        match row {
-            Some(r) => {
-                used[r] = true;
-                joined += 1;
-                for (c, name) in table.columns.iter().enumerate() {
-                    if c == key_i {
-                        continue;
-                    }
-                    let mut field = name.clone();
-                    while props.contains_key(&field) {
-                        field.push_str("_2");
-                    }
-                    if field != *name {
-                        renamed.insert(format!("{name} → {field}"));
-                    }
-                    props.insert(field, table.rows[r].get(c).cloned().unwrap_or(Value::Null));
-                }
+        if row.is_none() {
+            features_without += 1;
+            if !keep_unmatched {
+                continue;
             }
-            None => {
-                features_without += 1;
-                if !keep_unmatched {
-                    continue;
-                }
-                for (c, name) in table.columns.iter().enumerate() {
-                    if c != key_i && !props.contains_key(name) {
-                        props.insert(name.clone(), Value::Null);
-                    }
-                }
-            }
+        }
+        if let Some(r) = row {
+            used[r] = true;
+            joined += 1;
+        }
+        for (c, target) in targets.iter().enumerate() {
+            let Some(field) = target else { continue };
+            let value = match row {
+                Some(r) => table.rows[r].get(c).cloned().unwrap_or(Value::Null),
+                None => Value::Null,
+            };
+            props.insert(field.clone(), value);
         }
         let mut g = f.clone();
         g["properties"] = Value::Object(props);
@@ -1054,7 +1066,7 @@ fn join(req: &mut Request) -> Result<Value, String> {
         ));
     }
     if !renamed.is_empty() {
-        let list = renamed.iter().cloned().collect::<Vec<_>>().join(", ");
+        let list = renamed.join(", ");
         out = out.message(tr(req, "Columns the layer already had a field of were renamed: {list}.", &[("list", &list)]));
     }
     Ok(out.message(credit(req)).into())
@@ -1523,11 +1535,23 @@ mod tests {
         assert!(messages.contains(&"1 entidades sin fila."), "{messages:?}");
         assert!(messages.last().unwrap().starts_with("División: INE, Censo 2024 (345 comunas)"));
 
-        // Without the unmatched features, with the key named, in English.
+        // Colliding columns land in the same fields for matched and unmatched features: a column
+        // called like a layer field gets _2, and never takes another column's name.
         let communes = geojson::collection(vec![
             square(0.0, 0.0, json!({"codigo": "01101", "n": 1})),
             square(2.0, 0.0, json!({"codigo": "13101", "n": 2})),
         ]);
+        let csv = "cut,n,n_2\n1101,7,8\n";
+        let mut req =
+            request("join-cut", json!({"layer": "L", "table": "t.csv"}), &[("L", communes.clone())], &[("table", "t.csv", csv.as_bytes())]);
+        req.lang = "en".to_string();
+        let out = run(&mut req).unwrap();
+        let fs = out["layers"][0]["geojson"]["features"].as_array().unwrap();
+        assert_eq!(fs[0]["properties"], json!({"codigo": "01101", "n": 1, "n_2_2": 7, "n_2": 8}));
+        assert_eq!(fs[1]["properties"], json!({"codigo": "13101", "n": 2, "n_2_2": null, "n_2": null}), "the same fields, empty");
+        assert_eq!(out["messages"][3], "Columns the layer already had a field of were renamed: n → n_2_2.");
+
+        // Without the unmatched features, with the key named, in English.
         let csv = "cut,n\n1101,7\n";
         let mut req = request(
             "join-cut",
@@ -1542,6 +1566,7 @@ mod tests {
         assert_eq!(fs[0]["properties"]["n"], json!(1));
         assert_eq!(fs[0]["properties"]["n_2"], json!(7), "a colliding column gets _2");
         assert_eq!(out["messages"][3], "Columns the layer already had a field of were renamed: n → n_2.");
+        assert_eq!(out["messages"][2], "1 features without a row were left out.");
         assert_eq!(out["tables"].as_array().unwrap().len(), 0);
         assert_eq!(out["messages"][0], "Level: Commune. Key field in the layer: codigo. Key column in the table: cut.");
 

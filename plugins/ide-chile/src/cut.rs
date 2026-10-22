@@ -1135,9 +1135,7 @@ fn assign(req: &mut Request) -> Result<Value, String> {
     let only = Level::from_param(req.str("level"));
     let index = Index::new();
     if polygons.is_empty() {
-        return Ok(ToolOutput::new()
-            .message(tr(req, "{name} has no features.", &[("name", req.str("communes").unwrap_or("communes"))]))
-            .into());
+        return Err(tr(req, "{name} has no features.", &[("name", req.str("communes").unwrap_or("communes"))]));
     }
     let Some((field, level)) = layer_key(req, &index, &polygons, req.str("key"), only)? else {
         return Ok(ToolOutput::new()
@@ -1205,7 +1203,7 @@ fn complete(req: &mut Request) -> Result<Value, String> {
     let index = Index::new();
     let words = Words::new(req);
     if features.is_empty() {
-        return Ok(ToolOutput::new().message(tr(req, "{name} has no features.", &[("name", &layer_name)])).into());
+        return Err(tr(req, "{name} has no features.", &[("name", &layer_name)]));
     }
     let Some((field, level)) = layer_key(req, &index, &features, req.str("key"), only)? else {
         return Ok(ToolOutput::new()
@@ -1755,11 +1753,15 @@ mod tests {
         assert_eq!(q["CUT"], json!(13101));
         assert!(q.get("CUT_ORIG").is_none(), "{q}");
 
-        // The World Atlas: a message, no error.
+        // The World Atlas: a message, no error. An empty layer is an error, as in the join.
         let world = geojson::collection(vec![square(0.0, 0.0, json!({"name": "France"}))]);
         let mut req = request("complete-cut", json!({"layer": "W"}), &[("W", world)], &[]);
         let out = run(&mut req).unwrap();
         assert_eq!(out["layers"].as_array().unwrap().len(), 0);
         assert!(out["messages"][0].as_str().unwrap().starts_with("La capa no tiene un campo"));
+        let mut req = request("complete-cut", json!({"layer": "E"}), &[("E", geojson::collection(vec![]))], &[]);
+        assert_eq!(run(&mut req).unwrap_err(), "E no tiene entidades.");
+        let mut req = request("assign-cut", json!({"points": "E", "communes": "E"}), &[("E", geojson::collection(vec![]))], &[]);
+        assert_eq!(run(&mut req).unwrap_err(), "E no tiene entidades.");
     }
 }

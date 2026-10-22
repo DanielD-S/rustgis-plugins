@@ -1137,6 +1137,9 @@ fn assign(req: &mut Request) -> Result<Value, String> {
     if polygons.is_empty() {
         return Err(tr(req, "{name} has no features.", &[("name", req.str("communes").unwrap_or("communes"))]));
     }
+    // A layer with no key is a run with a message, not an error (the join, whose file the user
+    // picked for this layer, errs): the tool is run on any layer, the registry's smoke test among
+    // them, and says why nothing came of it.
     let Some((field, level)) = layer_key(req, &index, &polygons, req.str("key"), only)? else {
         return Ok(ToolOutput::new()
             .message(tr(req, "The layer has no field of CUT codes or names: name it in the key field.", &[]))
@@ -1205,6 +1208,7 @@ fn complete(req: &mut Request) -> Result<Value, String> {
     if features.is_empty() {
         return Err(tr(req, "{name} has no features.", &[("name", &layer_name)]));
     }
+    // As in `assign`: no key, a message rather than an error.
     let Some((field, level)) = layer_key(req, &index, &features, req.str("key"), only)? else {
         return Ok(ToolOutput::new()
             .message(tr(req, "The layer has no field of CUT codes or names: name it in the key field.", &[]))

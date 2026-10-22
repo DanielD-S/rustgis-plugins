@@ -97,6 +97,10 @@ Tools pane under **Plugins › IDE Chile** and on the tab's **CUT** group, take 
   a value was an old code, another spelling, empty or unknown. A field the layer already had with
   another value (the Census 2017 layers' numeric `REGION`, say) is kept as `<field>_ORIG`.
 
+An empty layer or table stops a tool with an error. A layer with no field of codes or names
+stops Join Table by CUT with an error too, but Assign Commune to Points and Complete CUT end with
+a message saying so and no result: they are run on any layer, and say why nothing came of it.
+
 What the tools recognise:
 
 - Codes with or without the leading zero, as text or as numbers (`1101`, `01101`, `1101.0`);

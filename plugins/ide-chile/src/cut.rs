@@ -438,8 +438,7 @@ pub fn read_csv(bytes: &[u8]) -> Result<Table, String> {
         Ok(s) => s.to_string(),
         Err(_) => windows_1252(bytes),
     };
-    let header_end = text.find('\n').unwrap_or(text.len());
-    let sep = detect_separator(&text[..header_end]);
+    let sep = detect_separator(header_line(&text));
     let records = parse_records(&text, sep);
     let mut records = records.into_iter().filter(|r| !(r.len() == 1 && r[0].trim().is_empty()));
     let Some(header) = records.next() else { return Ok(Table::default()) };
@@ -547,6 +546,19 @@ fn parse_chilean(s: &str) -> Option<f64> {
         text.push_str(f);
     }
     text.parse::<f64>().ok().map(|f| sign * f).filter(|f| f.is_finite())
+}
+
+/// The header line of a delimited text: up to the first line break outside quotes.
+fn header_line(text: &str) -> &str {
+    let mut quoted = false;
+    for (i, c) in text.char_indices() {
+        match c {
+            '"' => quoted = !quoted,
+            '\n' | '\r' if !quoted => return &text[..i],
+            _ => {}
+        }
+    }
+    text
 }
 
 /// The separator a header line uses: the one of `;`, `,`, tab and `|` it has most of, outside
@@ -938,6 +950,8 @@ fn join(req: &mut Request) -> Result<Value, String> {
     let mut out_features = Vec::with_capacity(features.len());
     let mut joined = 0;
     let mut features_without = 0;
+    // Table columns the layer already had a field of, with the name they got.
+    let mut renamed = std::collections::BTreeSet::new();
     for f in &features {
         let mut props = properties(f);
         let key = props.get(&layer_field).cloned().unwrap_or(Value::Null);
@@ -953,6 +967,9 @@ fn join(req: &mut Request) -> Result<Value, String> {
                     let mut field = name.clone();
                     while props.contains_key(&field) {
                         field.push_str("_2");
+                    }
+                    if field != *name {
+                        renamed.insert(format!("{name} → {field}"));
                     }
                     props.insert(field, table.rows[r].get(c).cloned().unwrap_or(Value::Null));
                 }
@@ -1035,6 +1052,10 @@ fn join(req: &mut Request) -> Result<Value, String> {
             if keep_unmatched { "{n} features without a row." } else { "{n} features without a row were left out." },
             &[("n", &n)],
         ));
+    }
+    if !renamed.is_empty() {
+        let list = renamed.iter().cloned().collect::<Vec<_>>().join(", ");
+        out = out.message(tr(req, "Columns the layer already had a field of were renamed: {list}.", &[("list", &list)]));
     }
     Ok(out.message(credit(req)).into())
 }
@@ -1377,6 +1398,11 @@ mod tests {
         assert_eq!(detect_separator("a;b;c"), ';');
         assert_eq!(detect_separator("\"a;b\",c"), ',');
         assert_eq!(detect_separator("abc"), ',');
+        // A header cell with a line break inside quotes doesn't cut the header short.
+        assert_eq!(header_line("\"a\nb\";c\nx;y\n"), "\"a\nb\";c");
+        let t = read_csv("\"a\nb\";c\n1;2\n".as_bytes()).unwrap();
+        assert_eq!(t.columns, ["a\nb", "c"]);
+        assert_eq!(t.rows[0], vec![json!(1), json!(2)]);
     }
 
     #[test]
@@ -1515,6 +1541,7 @@ mod tests {
         assert_eq!(fs.len(), 1);
         assert_eq!(fs[0]["properties"]["n"], json!(1));
         assert_eq!(fs[0]["properties"]["n_2"], json!(7), "a colliding column gets _2");
+        assert_eq!(out["messages"][3], "Columns the layer already had a field of were renamed: n → n_2.");
         assert_eq!(out["tables"].as_array().unwrap().len(), 0);
         assert_eq!(out["messages"][0], "Level: Commune. Key field in the layer: codigo. Key column in the table: cut.");
 

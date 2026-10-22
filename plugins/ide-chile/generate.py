@@ -364,6 +364,7 @@ TOOL_MESSAGES = {
     "{n} rows without a feature (see the table 'Rows without a feature').": "{n} filas sin entidad (vea la tabla 'Filas sin entidad').",
     "{n} features without a row.": "{n} entidades sin fila.",
     "{n} features without a row were left out.": "{n} entidades sin fila se dejaron fuera.",
+    "Columns the layer already had a field of were renamed: {list}.": "Columnas de las que la capa ya tenía un campo, renombradas: {list}.",
     "{n} of {total} points fall in a polygon; {outside} fall in none.": "{n} de {total} puntos caen en un polígono; {outside} no caen en ninguno.",
     "{n} of {total} features recognised; {unmatched} not (see the field CUT_NOTA).": "{n} de {total} entidades reconocidas; {unmatched} no (vea el campo CUT_NOTA).",
     "{n} old codes translated to today's.": "{n} códigos antiguos traducidos a los vigentes.",

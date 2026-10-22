@@ -61,9 +61,9 @@ PACKAGES_URL = "https://packages.rustgis.app"
 INDEX_URL = "https://plugins.rustgis.app/packages.json"
 DIST = ROOT / "dist"
 TARGET = ROOT / "target" / "wasm32-unknown-unknown" / "release"
-# Plugins still built from a folder in plugins/, until they are published from a repository of
-# their own. Nothing is added here: new plugins are listed by 'source'.
-LEGACY_PATHS = {"ide-chile"}
+# Plugins still built from a folder in plugins/. None is left: every plugin is listed by 'source',
+# from a release of its own repository, and nothing is added here.
+LEGACY_PATHS: set[str] = set()
 
 ID_RE = re.compile(r"^[a-z][a-z0-9-]{0,63}$")
 # Versions name objects in the bucket, so only safe characters: 1.2.3, 1.2.3-beta.1, 1.2.3+build.5.

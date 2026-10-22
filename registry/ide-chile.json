@@ -1,1 +1,11 @@
-{"id": "ide-chile", "path": "plugins/ide-chile", "categories": ["Data", "Basemaps"]}
+{
+  "id": "ide-chile",
+  "source": {
+    "url": "https://github.com/DanielD-S/rustgis-ide-chile/releases/download/v0.3.0/ide-chile-0.3.0.rgplugin",
+    "sha256": "9f9f57514ab9930c1df7fc9582ad1a883afea1f1f50a1219de508b824220b87f"
+  },
+  "categories": [
+    "Data",
+    "Basemaps"
+  ]
+}

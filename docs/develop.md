@@ -170,7 +170,7 @@ let out = host::run("layer.addUrl", json!({"url": url, "name": "Comuni", "zoom":
   (CORS), as for **Add Data › From URL**.
 
 `layer.addData` opens files, not addresses: use `layer.addUrl` for those.
-[IDE Chile](https://github.com/opengeos/rustgis-plugins/tree/main/plugins/ide-chile) adds its
+[IDE Chile](https://github.com/DanielD-S/rustgis-ide-chile) adds its
 layers with `layer.addUrl`.
 
 ## Translations

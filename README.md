@@ -53,8 +53,8 @@ set **Plugins › Plugin Manager › Settings › Plugin registry** to
 3. Open a pull request here that adds that entry as `registry/<id>.json`. See
    [Publish a plugin](https://plugins.rustgis.app/registry/).
 
-`plugins/ide-chile` is the last plugin still built from source here, until it moves to a
-repository of its own; `build.py` refuses a `path` entry for any other plugin.
+Every plugin is listed by `source`, from a release of its own repository; `build.py` refuses a
+`path` entry.
 
 ## Deployment
 

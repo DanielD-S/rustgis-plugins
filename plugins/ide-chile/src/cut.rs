@@ -421,6 +421,9 @@ pub struct Table {
     /// Rows that had more cells than the header (a stray separator): their extra cells are
     /// dropped, and the tool says how many rows that happened to.
     pub overlong: usize,
+    /// Columns read with dots as thousands separators (`1.234` → 1234): the Chilean notation,
+    /// which a semicolon-separated file is assumed to use, and ambiguous with a decimal point.
+    pub thousands: Vec<String>,
 }
 
 impl Table {
@@ -460,6 +463,7 @@ pub fn read_csv(bytes: &[u8]) -> Result<Table, String> {
         columns.push(name);
     }
     let mut overlong = 0;
+    let mut thousands = Vec::new();
     let raw: Vec<Vec<String>> = records
         .map(|mut r| {
             if r.len() > columns.len() && r[columns.len()..].iter().any(|c| !c.trim().is_empty()) {
@@ -477,7 +481,11 @@ pub fn read_csv(bytes: &[u8]) -> Result<Table, String> {
         let cells: Vec<&str> = raw.iter().map(|r| r[c].trim()).collect();
         let non_empty: Vec<&str> = cells.iter().copied().filter(|s| !is_empty(&Value::String((*s).to_string()))).collect();
         let parsers: [fn(&str) -> Option<f64>; 2] = if chilean_first { [parse_chilean, parse_plain] } else { [parse_plain, parse_chilean] };
-        let parser = parsers.iter().find(|p| !non_empty.is_empty() && non_empty.iter().all(|s| p(s).is_some()));
+        let chosen = (0..2).find(|&i| !non_empty.is_empty() && non_empty.iter().all(|s| parsers[i](s).is_some()));
+        let parser = chosen.map(|i| parsers[i]);
+        if chosen == Some(if chilean_first { 0 } else { 1 }) && non_empty.iter().any(|s| s.contains('.')) {
+            thousands.push(columns[c].clone());
+        }
         for (r, cell) in cells.iter().enumerate() {
             let v = if is_empty(&Value::String((*cell).to_string())) {
                 Value::Null
@@ -489,7 +497,7 @@ pub fn read_csv(bytes: &[u8]) -> Result<Table, String> {
             rows[r].push(v);
         }
     }
-    Ok(Table { columns, rows, overlong })
+    Ok(Table { columns, rows, overlong, thousands })
 }
 
 /// A JSON number: an integer when it is one.
@@ -533,7 +541,8 @@ fn parse_chilean(s: &str) -> Option<f64> {
         return None;
     }
     let groups: Vec<&str> = int.split('.').collect();
-    if groups.len() > 1 && (groups[0].is_empty() || groups[0].len() > 3 || groups[1..].iter().any(|g| g.len() != 3)) {
+    // A thousands group never starts with 0: `0.123` is a decimal, not 123.
+    if groups.len() > 1 && (groups[0].is_empty() || groups[0] == "0" || groups[0].len() > 3 || groups[1..].iter().any(|g| g.len() != 3)) {
         return None;
     }
     if !groups.iter().all(|g| g.bytes().all(|b| b.is_ascii_digit())) {
@@ -1096,6 +1105,13 @@ fn join(req: &mut Request) -> Result<Value, String> {
             &[("n", &n)],
         ));
     }
+    if !table.thousands.is_empty() {
+        out = out.message(tr(
+            req,
+            "Columns read with dots as thousands separators (1.234 is 1234): {list}.",
+            &[("list", &table.thousands.join(", "))],
+        ));
+    }
     if table.overlong > 0 {
         out = out.message(tr(
             req,
@@ -1402,6 +1418,11 @@ mod tests {
         assert_eq!(t.rows.len(), 2);
         assert_eq!(t.rows[0], vec![json!("01101"), json!("Iquique"), json!(223463), json!(12.5), json!("con; punto y coma")]);
         assert_eq!(t.rows[1], vec![json!("5502"), json!("La Calera"), json!(50554), json!(-3.25), Value::Null]);
+        assert_eq!(t.thousands, ["POBLACIÓN"], "the column read with dots as thousands; TASA has none");
+        // A column of three-decimal shares in a semicolon file is read as decimals, not thousands.
+        let t = read_csv("a;tasa\n1;0.123\n2;0.456\n".as_bytes()).unwrap();
+        assert_eq!(t.rows[0], vec![json!(1), json!(0.123)]);
+        assert!(t.thousands.is_empty());
         // Codes with a leading zero keep their column as text (parse_code reads both anyway).
         // UTF-8 with a BOM, commas, plain decimals, a quoted line break, an empty header.
         let text = "\u{feff}cut,nombre,valor,\n13101,Santiago,\"1,5\",x\n13110,\"La\nFlorida\",\"2,25\",y\n\n";
@@ -1426,6 +1447,9 @@ mod tests {
         assert_eq!(parse_chilean("1.234"), Some(1234.0));
         assert_eq!(parse_chilean("12,5"), Some(12.5));
         assert_eq!(parse_chilean("1.23"), None);
+        assert_eq!(parse_chilean("0.123"), None, "a decimal, not 123");
+        assert_eq!(parse_chilean("-0.123"), None);
+        assert_eq!(parse_chilean("10.123"), Some(10123.0));
         assert_eq!(parse_chilean("12.345,6%"), Some(12345.6));
         assert_eq!(parse_plain("1.23"), Some(1.23));
         assert_eq!(parse_plain("1,5"), None);

@@ -637,9 +637,12 @@ impl Rings {
             let pts: Vec<[f64; 2]> = v.as_array()?.iter().filter_map(|p| Some([p.get(0)?.as_f64()?, p.get(1)?.as_f64()?])).collect();
             (pts.len() >= 4).then_some(pts)
         }
+        // The outer ring must be sound (a hole must not stand in for it); a bad hole is skipped.
         fn polygon(v: &Value) -> Option<Vec<Vec<[f64; 2]>>> {
-            let rings: Vec<Vec<[f64; 2]>> = v.as_array()?.iter().filter_map(ring).collect();
-            (!rings.is_empty()).then_some(rings)
+            let mut parts = v.as_array()?.iter();
+            let mut rings = vec![ring(parts.next()?)?];
+            rings.extend(parts.filter_map(ring));
+            Some(rings)
         }
         let polygons: Vec<Vec<Vec<[f64; 2]>>> = match geometry.get("type").and_then(Value::as_str)? {
             "Polygon" => vec![polygon(geometry.get("coordinates")?)?],
@@ -659,6 +662,58 @@ impl Rings {
             return false;
         }
         self.polygons.iter().any(|rings| in_ring(&rings[0], p) && !rings[1..].iter().any(|hole| in_ring(hole, p)))
+    }
+}
+
+/// The polygons' boxes on a coarse grid over them all, so a point is tested against the few
+/// polygons whose boxes share its cell rather than every one (a million points against the 345
+/// communes would otherwise be a third of a billion box tests).
+struct Grid {
+    bbox: [f64; 4],
+    side: usize,
+    /// For each cell, the indexes of the polygons whose boxes reach it.
+    cells: Vec<Vec<usize>>,
+}
+
+impl Grid {
+    fn new(polygons: &[Rings]) -> Option<Grid> {
+        let bbox = polygons.iter().map(|r| r.bbox).reduce(|a, b| [a[0].min(b[0]), a[1].min(b[1]), a[2].max(b[2]), a[3].max(b[3])])?;
+        let side = ((polygons.len() as f64).sqrt() * 2.0).ceil().clamp(1.0, 128.0) as usize;
+        let mut grid = Grid { bbox, side, cells: vec![Vec::new(); side * side] };
+        for (i, r) in polygons.iter().enumerate() {
+            let (x0, y0) = grid.cell([r.bbox[0], r.bbox[1]]);
+            let (x1, y1) = grid.cell([r.bbox[2], r.bbox[3]]);
+            for y in y0..=y1 {
+                for x in x0..=x1 {
+                    grid.cells[y * side + x].push(i);
+                }
+            }
+        }
+        Some(grid)
+    }
+
+    /// The cell a position falls in (clamped to the grid).
+    fn cell(&self, p: [f64; 2]) -> (usize, usize) {
+        let [w, s, e, n] = self.bbox;
+        let f = |v: f64, lo: f64, hi: f64| {
+            if hi > lo { (((v - lo) / (hi - lo)) * self.side as f64).floor().clamp(0.0, (self.side - 1) as f64) as usize } else { 0 }
+        };
+        (f(p[0], w, e), f(p[1], s, n))
+    }
+
+    /// Whether a position is within the grid's box.
+    fn covers(&self, p: [f64; 2]) -> bool {
+        let [w, s, e, n] = self.bbox;
+        p[0] >= w && p[0] <= e && p[1] >= s && p[1] <= n
+    }
+
+    /// The polygons whose boxes share the position's cell.
+    fn candidates(&self, p: [f64; 2]) -> &[usize] {
+        if !self.covers(p) {
+            return &[];
+        }
+        let (x, y) = self.cell(p);
+        &self.cells[y * self.side + x]
     }
 }
 
@@ -1013,24 +1068,18 @@ fn assign(req: &mut Request) -> Result<Value, String> {
     let mut out_features = Vec::with_capacity(points.len());
     let mut inside = 0;
     let mut any_overlap = false;
-    let all_bbox = places.iter().fold(None, |b: Option<[f64; 4]>, (r, _)| {
-        Some(match b {
-            None => r.bbox,
-            Some(b) => [b[0].min(r.bbox[0]), b[1].min(r.bbox[1]), b[2].max(r.bbox[2]), b[3].max(r.bbox[3])],
-        })
-    });
+    let (rings, codes): (Vec<Rings>, Vec<Place>) = places.into_iter().unzip();
+    let grid = Grid::new(&rings);
     for f in &points {
         let mut props = properties(f);
         let p = f.get("geometry").and_then(position);
-        let hit = p.and_then(|p| places.iter().find(|(r, _)| r.contains(p)).map(|(_, place)| *place));
-        if let (Some(p), Some(b)) = (p, all_bbox)
-            && p[0] >= b[0]
-            && p[0] <= b[2]
-            && p[1] >= b[1]
-            && p[1] <= b[3]
-        {
-            any_overlap = true;
-        }
+        let hit = match (p, &grid) {
+            (Some(p), Some(grid)) => {
+                any_overlap |= grid.covers(p);
+                grid.candidates(p).iter().find(|&&i| rings[i].contains(p)).map(|&i| codes[i])
+            }
+            _ => None,
+        };
         match hit {
             Some(place) => {
                 inside += 1;
@@ -1342,6 +1391,28 @@ mod tests {
         let r = Rings::of(&m).unwrap();
         assert!(r.contains([0.5, 0.5]) && r.contains([5.5, 5.5]) && !r.contains([3.0, 3.0]));
         assert!(Rings::of(&json!({"type": "Point", "coordinates": [0, 0]})).is_none());
+        // A degenerate outer ring doesn't let a hole stand in for it; a bad hole is skipped.
+        let bad_outer = json!({"type": "Polygon", "coordinates": [[[0, 0], [1, 1]], [[4, 4], [6, 4], [6, 6], [4, 6], [4, 4]]]});
+        assert!(Rings::of(&bad_outer).is_none());
+        let bad_hole = json!({"type": "Polygon", "coordinates": [[[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]], [[4, 4], [6, 6]]]});
+        let r = Rings::of(&bad_hole).unwrap();
+        assert_eq!(r.polygons[0].len(), 1);
+        assert!(r.contains([5.0, 5.0]));
+        // The grid: a point finds the polygon whose box shares its cell, and only that one.
+        let squares: Vec<Rings> = (0..400)
+            .map(|i| {
+                let (x, y) = ((i % 20) as f64 * 2.0, (i / 20) as f64 * 2.0);
+                Rings::of(&json!({"type": "Polygon", "coordinates": [[[x, y], [x + 1.0, y], [x + 1.0, y + 1.0], [x, y + 1.0], [x, y]]]}))
+                    .unwrap()
+            })
+            .collect();
+        let grid = Grid::new(&squares).unwrap();
+        assert_eq!(grid.side, 40);
+        let c = grid.candidates([6.5, 4.5]);
+        assert!(c.contains(&43) && c.len() <= 4, "{c:?}");
+        assert!(squares[43].contains([6.5, 4.5]));
+        assert!(grid.candidates([100.0, 100.0]).is_empty() && !grid.covers([100.0, 100.0]));
+        assert!(Grid::new(&[]).is_none());
         assert_eq!(position(&json!({"type": "Point", "coordinates": [-70.6, -33.4]})), Some([-70.6, -33.4]));
         assert_eq!(position(&json!({"type": "MultiPoint", "coordinates": [[1, 2], [3, 4]]})), Some([1.0, 2.0]));
     }

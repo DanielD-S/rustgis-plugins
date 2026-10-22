@@ -930,7 +930,12 @@ fn join(req: &mut Request) -> Result<Value, String> {
         props.insert(tr(req, "Row", &[]), json!(i + 1));
         props.insert(tr(req, "Reason", &[]), json!(note));
         for (c, name) in table.columns.iter().enumerate() {
-            props.insert(name.clone(), row.get(c).cloned().unwrap_or(Value::Null));
+            // A column of the table called like those two keeps its own name with _2.
+            let mut field = name.clone();
+            while props.contains_key(&field) {
+                field.push_str("_2");
+            }
+            props.insert(field, row.get(c).cloned().unwrap_or(Value::Null));
         }
         unmatched_rows.push(geojson::feature(Value::Null, Value::Object(props)));
     }
@@ -1098,18 +1103,14 @@ fn complete(req: &mut Request) -> Result<Value, String> {
         }
         for k in fields {
             let v = new.iter().find(|(n, _)| n == k).map(|(_, v)| v.clone()).unwrap_or(Value::Null);
-            // A field the layer already has, with another value, is kept as <field>_ORIG.
+            // A field the layer already has, with another value, is kept as <field>_ORIG (an empty
+            // one isn't worth keeping, unless it is the key itself). An _ORIG that is already there,
+            // from an earlier run, is the original and stays.
             if let Some(old) = props.get(*k).cloned()
                 && old != v
-                && !is_empty(&old)
-                && *k != field
+                && (*k == field || !is_empty(&old))
             {
-                props.insert(format!("{k}_ORIG"), old);
-            } else if let Some(old) = props.get(*k).cloned()
-                && *k == field
-                && old != v
-            {
-                props.insert(format!("{k}_ORIG"), old);
+                props.entry(format!("{k}_ORIG")).or_insert(old);
             }
             props.insert(k.to_string(), v);
         }
@@ -1446,6 +1447,18 @@ mod tests {
         assert_eq!(out["tables"].as_array().unwrap().len(), 0);
         assert_eq!(out["messages"][0], "Level: Commune. Key field in the layer: codigo. Key column in the table: cut.");
 
+        // A table with columns called like the unmatched table's own: those keep their name
+        // with _2, the row number and the reason stay.
+        let cl = geojson::collection(vec![square(0.0, 0.0, json!({"CUT": 1101}))]);
+        let csv = "cut,Fila,Motivo\n1101,x,y\n99999,a,b\n";
+        let mut req = request("join-cut", json!({"layer": "C", "table": "t.csv"}), &[("C", cl)], &[("table", "t.csv", csv.as_bytes())]);
+        let out = run(&mut req).unwrap();
+        let row = &out["tables"][0]["geojson"]["features"][0]["properties"];
+        assert_eq!(row["Fila"], json!(2));
+        assert_eq!(row["Motivo"], "no es un código conocido");
+        assert_eq!(row["Fila_2"], "a");
+        assert_eq!(row["Motivo_2"], "b");
+
         // Errors: no key in the layer, no key in the table, a named column that isn't there.
         let world = geojson::collection(vec![square(0.0, 0.0, json!({"name": "France"}))]);
         let mut req = request(
@@ -1553,6 +1566,16 @@ mod tests {
         assert_eq!(p["COMUNA"], "Santiago");
         assert_eq!(p["COMUNA_ORIG"], json!(13101));
         assert_eq!(p["TOTAL_PERS"], json!(404495));
+
+        // Run again on the result: the original stays in COMUNA_ORIG, nothing else changes.
+        let again = out["layers"][0]["geojson"].clone();
+        let mut req = request("complete-cut", json!({"layer": "L"}), &[("L", again)], &[]);
+        let out = run(&mut req).unwrap();
+        let q = &out["layers"][0]["geojson"]["features"][0]["properties"];
+        assert_eq!(q["COMUNA_ORIG"], json!(13101), "the first run's original, not 'Santiago'");
+        assert_eq!(q["COMUNA"], "Santiago");
+        assert_eq!(q["CUT"], json!(13101));
+        assert!(q.get("CUT_ORIG").is_none(), "{q}");
 
         // The World Atlas: a message, no error.
         let world = geojson::collection(vec![square(0.0, 0.0, json!({"name": "France"}))]);

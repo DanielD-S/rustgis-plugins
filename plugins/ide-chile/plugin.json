@@ -1,16 +1,17 @@
 {
   "id": "ide-chile",
   "name": "IDE Chile",
-  "version": "0.2.0",
-  "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.",
+  "version": "0.3.0",
+  "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names.",
   "author": "Daniel Díaz",
   "homepage": "https://github.com/opengeos/rustgis-plugins/tree/main/plugins/ide-chile",
   "license": "MIT",
   "entry": "plugin.wasm",
   "abi": 1,
-  "minRustgisVersion": "0.2.0",
+  "minRustgisVersion": "0.3.0",
   "permissions": [
     "edit",
+    "files",
     "network"
   ],
   "commands": [
@@ -414,7 +415,146 @@
       "params": "{}"
     }
   ],
-  "tools": [],
+  "tools": [
+    {
+      "id": "join-cut",
+      "name": "Join Table by CUT",
+      "toolbox": "IDE Chile",
+      "summary": "Joins a CSV table to communes, provinces or regions by their código único territorial (CUT) or their name: codes with or without the leading zero, names however they are spelt, and the codes of before Ñuble (2018) and Arica y Parinacota and Los Ríos (2007). The table may be semicolon-separated and in Windows-1252, with decimal commas.",
+      "params": [
+        {
+          "name": "layer",
+          "label": "Layer of communes, provinces or regions",
+          "kind": "vectorLayer",
+          "required": true,
+          "help": "A layer with a CUT or name field: Census 2024 › Communes, Provinces or Regions, or any other."
+        },
+        {
+          "name": "table",
+          "label": "Table (CSV)",
+          "kind": "file",
+          "required": true,
+          "extensions": [
+            "csv",
+            "txt",
+            "tsv"
+          ],
+          "help": "A CSV file with a column of CUT codes or names, as the INE, SINIM, CASEN, Servel or DEIS publish them."
+        },
+        {
+          "name": "level",
+          "label": "Level",
+          "kind": "choice",
+          "choices": [
+            "Auto",
+            "Commune",
+            "Province",
+            "Region"
+          ],
+          "default": "Auto",
+          "help": "Whether the codes and names are communes, provinces or regions. Auto tells from the layer."
+        },
+        {
+          "name": "layer_key",
+          "label": "Key field in the layer",
+          "kind": "text",
+          "default": "",
+          "help": "The field holding the CUT code (1101 or 01101) or the name. Blank: the tool finds it."
+        },
+        {
+          "name": "table_key",
+          "label": "Key column in the table",
+          "kind": "text",
+          "default": "",
+          "help": "The column holding the CUT code or the name. Blank: the tool finds it."
+        },
+        {
+          "name": "keep_unmatched",
+          "label": "Keep features without a row",
+          "kind": "bool",
+          "default": true,
+          "help": "Off: the result has only the features the table has a row for."
+        }
+      ]
+    },
+    {
+      "id": "assign-cut",
+      "name": "Assign Commune to Points",
+      "toolbox": "IDE Chile",
+      "summary": "Gives each point the commune, province and region it falls in, with their CUT codes and names, from a layer of communes (Census 2024 › Communes, or provinces or regions).",
+      "params": [
+        {
+          "name": "points",
+          "label": "Points",
+          "kind": "pointLayer",
+          "required": true,
+          "help": "Addresses, stations, premises… in the same coordinate system as the communes."
+        },
+        {
+          "name": "communes",
+          "label": "Communes, provinces or regions",
+          "kind": "polygonLayer",
+          "required": true,
+          "help": "Census 2024 › Communes gives all three levels; a layer of provinces or regions gives its own and above."
+        },
+        {
+          "name": "level",
+          "label": "Level",
+          "kind": "choice",
+          "choices": [
+            "Auto",
+            "Commune",
+            "Province",
+            "Region"
+          ],
+          "default": "Auto",
+          "help": "Whether the codes and names are communes, provinces or regions. Auto tells from the layer."
+        },
+        {
+          "name": "key",
+          "label": "Key field in the polygons",
+          "kind": "text",
+          "default": "",
+          "help": "The field holding the CUT code (1101 or 01101) or the name. Blank: the tool finds it."
+        }
+      ]
+    },
+    {
+      "id": "complete-cut",
+      "name": "Complete CUT",
+      "toolbox": "IDE Chile",
+      "summary": "Adds the current CUT code and the official names of the commune, province and region to a layer that has a code or name field, however it is written: 4 or 5 digits, old codes, other spellings.",
+      "params": [
+        {
+          "name": "layer",
+          "label": "Layer",
+          "kind": "vectorLayer",
+          "required": true,
+          "help": "Any layer with a field of CUT codes or of commune, province or region names."
+        },
+        {
+          "name": "key",
+          "label": "Key field",
+          "kind": "text",
+          "default": "",
+          "help": "The field holding the CUT code (1101 or 01101) or the name. Blank: the tool finds it."
+        },
+        {
+          "name": "level",
+          "label": "Level",
+          "kind": "choice",
+          "choices": [
+            "Auto",
+            "Commune",
+            "Province",
+            "Region"
+          ],
+          "default": "Auto",
+          "help": "Whether the codes and names are communes, provinces or regions. Auto tells from the layer."
+        }
+      ]
+    }
+  ],
   "tab": {
     "label": "IDE Chile",
     "groups": [
@@ -546,6 +686,14 @@
         ]
       },
       {
+        "label": "CUT",
+        "items": [
+          "tool:join-cut",
+          "tool:assign-cut",
+          "tool:complete-cut"
+        ]
+      },
+      {
         "label": "Manage",
         "items": [
           "clear",
@@ -666,7 +814,7 @@
       "About IDE Chile": "Acerca de IDE Chile",
       "The sources behind the layers.": "Las fuentes de las capas.",
       "IDE Chile": "IDE Chile",
-      "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.": "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y los Censos 2024 y 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables.",
+      "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names.": "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y los Censos 2024 y 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres.",
       "Added {name} (map image, under the layers; Map › Basemap lists it).": "Añadida {name} (imagen del mapa, bajo las capas; Mapa › Mapa base la lista).",
       "In the web app, add {name} with Home › Add Data › From URL and this address: {url}": "En la app web, añada {name} con Inicio › Añadir datos › Desde URL y esta dirección: {url}",
       "In the web app, {name} is shown as a map image; its features need the desktop app.": "En la app web, {name} se muestra como imagen del mapa; sus entidades requieren la app de escritorio.",
@@ -683,6 +831,67 @@
       "Removed {n} IDE Chile layers.": "Quitadas {n} capas de IDE Chile.",
       "No IDE Chile map layers to remove.": "No hay capas de mapa de IDE Chile que quitar.",
       "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU and INE. Each layer's credit names its source.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU e INE. El crédito de cada capa nombra su fuente.",
+      "Join Table by CUT": "Unir tabla por CUT",
+      "Joins a CSV table to communes, provinces or regions by their código único territorial (CUT) or their name: codes with or without the leading zero, names however they are spelt, and the codes of before Ñuble (2018) and Arica y Parinacota and Los Ríos (2007). The table may be semicolon-separated and in Windows-1252, with decimal commas.": "Une una tabla CSV a comunas, provincias o regiones por su código único territorial (CUT) o por su nombre: códigos con o sin el cero inicial, nombres como vengan escritos, y los códigos de antes de Ñuble (2018) y de Arica y Parinacota y Los Ríos (2007). La tabla puede venir separada por punto y coma, en Windows-1252 y con decimales con coma.",
+      "Layer of communes, provinces or regions": "Capa de comunas, provincias o regiones",
+      "A layer with a CUT or name field: Census 2024 › Communes, Provinces or Regions, or any other.": "Una capa con un campo de CUT o de nombre: Censo 2024 › Comunas, Provincias o Regiones, o cualquier otra.",
+      "Table (CSV)": "Tabla (CSV)",
+      "A CSV file with a column of CUT codes or names, as the INE, SINIM, CASEN, Servel or DEIS publish them.": "Un archivo CSV con una columna de códigos CUT o de nombres, como los publican el INE, SINIM, CASEN, Servel o DEIS.",
+      "Key field in the layer": "Campo clave en la capa",
+      "Key column in the table": "Columna clave en la tabla",
+      "The column holding the CUT code or the name. Blank: the tool finds it.": "La columna con el código único territorial o el nombre. En blanco: la herramienta la encuentra.",
+      "Keep features without a row": "Conservar entidades sin fila",
+      "Off: the result has only the features the table has a row for.": "Desactivado: el resultado tiene solo las entidades con una fila en la tabla.",
+      "Assign Commune to Points": "Asignar comuna a puntos",
+      "Gives each point the commune, province and region it falls in, with their CUT codes and names, from a layer of communes (Census 2024 › Communes, or provinces or regions).": "Da a cada punto la comuna, provincia y región en que cae, con sus códigos CUT y nombres, a partir de una capa de comunas (Censo 2024 › Comunas, o de provincias o regiones).",
+      "Points": "Puntos",
+      "Addresses, stations, premises… in the same coordinate system as the communes.": "Direcciones, estaciones, locales… en el mismo sistema de coordenadas que las comunas.",
+      "Communes, provinces or regions": "Comunas, provincias o regiones",
+      "Census 2024 › Communes gives all three levels; a layer of provinces or regions gives its own and above.": "Censo 2024 › Comunas da los tres niveles; una capa de provincias o regiones da el suyo y los superiores.",
+      "Key field in the polygons": "Campo clave en los polígonos",
+      "Complete CUT": "Completar CUT",
+      "Adds the current CUT code and the official names of the commune, province and region to a layer that has a code or name field, however it is written: 4 or 5 digits, old codes, other spellings.": "Añade el código único territorial vigente y los nombres oficiales de comuna, provincia y región a una capa que tenga un campo de código o de nombre, como venga escrito: 4 o 5 dígitos, códigos antiguos, otras grafías.",
+      "Layer": "Capa",
+      "Any layer with a field of CUT codes or of commune, province or region names.": "Cualquier capa con un campo de códigos CUT o de nombres de comuna, provincia o región.",
+      "Key field": "Campo clave",
+      "Level": "Nivel",
+      "Whether the codes and names are communes, provinces or regions. Auto tells from the layer.": "Si los códigos y nombres son de comunas, provincias o regiones. Automático lo deduce de la capa.",
+      "The field holding the CUT code (1101 or 01101) or the name. Blank: the tool finds it.": "El campo con el código único territorial (1101 o 01101) o el nombre. En blanco: la herramienta lo encuentra.",
+      "Auto": "Automático",
+      "Commune": "Comuna",
+      "Province": "Provincia",
+      "Region": "Región",
+      "The table is empty.": "La tabla está vacía.",
+      "The table has no column of CUT codes or names: name it in 'Key column in the table'.": "La tabla no tiene una columna de códigos CUT ni de nombres: indíquela en 'Columna clave en la tabla'.",
+      "The table has no column '{name}'.": "La tabla no tiene una columna '{name}'.",
+      "The layer has no field of CUT codes or names: name it in the key field.": "La capa no tiene un campo de códigos CUT ni de nombres: indíquelo en el campo clave.",
+      "The layer has no field '{name}'.": "La capa no tiene un campo '{name}'.",
+      "{name} has no features.": "{name} no tiene entidades.",
+      "Level: {level}. Key field in the layer: {field}. Key column in the table: {column}.": "Nivel: {level}. Campo clave en la capa: {field}. Columna clave en la tabla: {column}.",
+      "Level: {level}. Key field: {field}.": "Nivel: {level}. Campo clave: {field}.",
+      "{n} of {total} rows joined; {features} of {all} features got a row.": "{n} de {total} filas unidas; {features} de {all} entidades recibieron una fila.",
+      "{n} rows without a feature (see the table 'Rows without a feature').": "{n} filas sin entidad (vea la tabla 'Filas sin entidad').",
+      "{n} features without a row.": "{n} entidades sin fila.",
+      "{n} features without a row were left out.": "{n} entidades sin fila se dejaron fuera.",
+      "{n} of {total} points fall in a polygon; {outside} fall in none.": "{n} de {total} puntos caen en un polígono; {outside} no caen en ninguno.",
+      "{n} of {total} features recognised; {unmatched} not (see the field CUT_NOTA).": "{n} de {total} entidades reconocidas; {unmatched} no (vea el campo CUT_NOTA).",
+      "{n} old codes translated to today's.": "{n} códigos antiguos traducidos a los vigentes.",
+      "{n} names matched by another spelling.": "{n} nombres reconocidos por otra grafía.",
+      "The points and the polygons don't overlap: are they in the same coordinate system?": "Los puntos y los polígonos no se superponen: ¿están en el mismo sistema de coordenadas?",
+      "Rows without a feature": "Filas sin entidad",
+      "Row": "Fila",
+      "Reason": "Motivo",
+      "Joined": "Unida",
+      "With commune": "Con comuna",
+      "Completed": "Completada",
+      "not a known code": "no es un código conocido",
+      "not a known name": "no es un nombre conocido",
+      "empty": "vacío",
+      "duplicate of row {n}": "duplicado de la fila {n}",
+      "no feature with this code": "ninguna entidad con este código",
+      "old code {old}": "código antiguo {old}",
+      "spelt {name}": "escrito {name}",
+      "Division: INE, Census 2024 ({n} communes); table checked on {date}.": "División: INE, Censo 2024 ({n} comunas); tabla verificada el {date}.",
       "Boundaries": "Límites",
       "Agriculture": "Agricultura",
       "Soils & Agriculture": "Suelos y agricultura",
@@ -700,6 +909,7 @@
       "Services": "Servicios",
       "Transport & Services": "Transporte y servicios",
       "Roads, railways, airports, schools, health, police and tourism (Geoportal de Chile).": "Red vial, ferrocarriles, aeródromos, escuelas, salud, Carabineros y turismo (Geoportal de Chile).",
+      "CUT": "CUT",
       "Manage": "Gestionar"
     }
   }

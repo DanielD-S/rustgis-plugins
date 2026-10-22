@@ -161,10 +161,15 @@ TAB = [
     ("Cities", "Ciudades", [("Cities & Housing", "Ciudades y vivienda", "polygon_layer", "Urban planning and housing layers (IDE MINVU).", "Capas de planificación urbana y vivienda (IDE MINVU).", ["urban-limits", "risk-areas", "heritage", "urban-wetlands", "settlements", "urban-parks", "housing-deficit", "bike-lanes"])]),
     ("Census", "Censo", [("Census 2024", "Censo 2024", "stats", "Census 2024 boundaries, indicators and neighbourhood units (INE).", "Límites, indicadores y unidades vecinales del Censo 2024 (INE).", ["census-2024-regions", "census-2024-provinces", "census-2024-communes", "census-2024-commune-indicators", "census-2024-region-indicators", "census-2024-neighbourhoods"]), ("Census 2017", "Censo 2017", "stats", "Census 2017 figures and microdata (INE).", "Cifras y microdatos del Censo 2017 (INE).", ["census-regions", "census-provinces", "census-communes", "census-blocks", "census-localities", "census-cities", "census-towns", "census-villages", "census-hamlets"])]),
     ("Services", "Servicios", [("Transport & Services", "Transporte y servicios", "point_layer", "Roads, railways, airports, schools, health, police and tourism (Geoportal de Chile).", "Red vial, ferrocarriles, aeródromos, escuelas, salud, Carabineros y turismo (Geoportal de Chile).", ["roads", "railways", "airports", "schools", "preschools", "higher-education", "health-services", "police", "municipalities", "capitals", "tourist-attractions", "street-markets", "sports", "sendero"])]),
+    ("CUT", "CUT", ["tool:join-cut", "tool:assign-cut", "tool:complete-cut"]),
     ("Manage", "Gestionar", ["clear", "about"]),
 ]
 
 PARAMS = '{"map"?: bool (the service\'s own map image as a web tile layer under the layers, instead of the features)}'
+
+VERSION = "0.3.0"
+DESCRIPTION = "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query. CUT tools join any table of Chile to its communes, provinces or regions by their código único territorial, assign communes to points and complete codes and names."
+DESCRIPTION_ES = "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y los Censos 2024 y 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables. Las herramientas CUT unen cualquier tabla de Chile a sus comunas, provincias o regiones por su código único territorial, asignan comunas a puntos y completan códigos y nombres."
 
 # Messages the module builds while it runs (see src/lib.rs), with their Spanish.
 MESSAGES = {
@@ -185,6 +190,270 @@ MESSAGES = {
     "No IDE Chile map layers to remove.": "No hay capas de mapa de IDE Chile que quitar.",
     "IDE Chile: {n} layers from Geoportal de Chile, IDE MINAGRI, IDE MINVU and INE. Each layer's credit names its source.": "IDE Chile: {n} capas del Geoportal de Chile, IDE MINAGRI, IDE MINVU e INE. El crédito de cada capa nombra su fuente.",
 }
+
+
+# ---------------------------------------------------------------------------------------------
+# The CUT tools: joining tables to communes, provinces and regions by their código único
+# territorial, assigning communes to points, and completing codes and names. Their table of
+# communes is the Census 2024 one (communes.json, from refresh.py); the spellings people use that
+# the INE doesn't, and the codes of before 2007 and 2018, are listed here and checked against it.
+
+COMMUNES = json.loads((root / "communes.json").read_text(encoding="utf-8"))
+
+# Words that stay lower case inside a name (never first).
+SMALL = {"de", "del", "la", "las", "los", "y", "e"}
+
+
+def titlecase(s):
+    """'SAN PEDRO DE LA PAZ' → 'San Pedro de la Paz', "O'HIGGINS" → "O'Higgins", 'LLAY-LLAY' → 'Llay-Llay'."""
+    words = []
+    for i, w in enumerate(s.split(" ")):
+        lw = w.lower()
+        if i and lw in SMALL:
+            words.append(lw)
+            continue
+        for sep in ("-", "'"):
+            lw = sep.join(p[:1].upper() + p[1:] for p in lw.split(sep))
+        words.append(lw)
+    return " ".join(words)
+
+
+# The regions: code → (short name, Roman numeral). The full names come from the INE.
+REGIONS = {
+    1: ("Tarapacá", "I"), 2: ("Antofagasta", "II"), 3: ("Atacama", "III"), 4: ("Coquimbo", "IV"), 5: ("Valparaíso", "V"),
+    6: ("O'Higgins", "VI"), 7: ("Maule", "VII"), 8: ("Biobío", "VIII"), 9: ("La Araucanía", "IX"), 10: ("Los Lagos", "X"),
+    11: ("Aysén", "XI"), 12: ("Magallanes", "XII"), 13: ("Metropolitana de Santiago", "XIII"), 14: ("Los Ríos", "XIV"),
+    15: ("Arica y Parinacota", "XV"), 16: ("Ñuble", "XVI"),
+}
+
+# Other names of regions: what people write → the region's code. Accents, case, spaces, hyphens
+# and apostrophes don't matter (the module normalises both sides), nor does a leading "Región de".
+REGION_ALIASES = {
+    "RM": 13, "Región Metropolitana": 13, "Metropolitana": 13, "Santiago": 13,
+    "Araucanía": 9,
+    "Aisén": 11, "Aisén del General Carlos Ibáñez del Campo": 11,
+    "Magallanes y Antártica Chilena": 12, "Magallanes y la Antártica Chilena": 12,
+    "Libertador Bernardo O'Higgins": 6, "Libertador Gral. Bernardo O'Higgins": 6,
+    "Arica-Parinacota": 15, "Arica Parinacota": 15,
+}
+
+# Other names of communes: what people write → the INE's name. Spelling differences only; a
+# difference of accents, case, spaces, hyphens or apostrophes needs no entry.
+COMMUNE_ALIASES = {
+    "Aisén": "Aysén", "Puerto Aysén": "Aysén", "Puerto Aisén": "Aysén",
+    "Coihaique": "Coyhaique",
+    "Paiguano": "Paihuano",
+    "Marchigüe": "Marchihue",
+    "Llay-Llay": "Llaillay", "Llay Llay": "Llaillay",
+    "La Calera": "Calera",
+    "Treguaco": "Trehuaco",
+    "Puerto Natales": "Natales",
+    "Puerto Saavedra": "Saavedra",
+    "Puerto Cisnes": "Cisnes",
+    "San Vicente de Tagua Tagua": "San Vicente",
+    "Cabo de Hornos (Ex-Navarino)": "Cabo de Hornos", "Navarino": "Cabo de Hornos", "Puerto Williams": "Cabo de Hornos",
+    # The commune of Antártica (12202) is drawn with Cabo de Hornos in the Census 2024 division.
+    "Antártica": "Cabo de Hornos",
+    "Santiago Centro": "Santiago",
+    "Rapa Nui": "Isla de Pascua",
+}
+
+# Codes of before the regions of Arica y Parinacota and Los Ríos (2007) and Ñuble (2018), and
+# Antártica's: the old CUT → the commune's name today, from which its current CUT is taken.
+OLD_CUTS = {
+    # Tarapacá's provinces of Arica (012) and Parinacota (013), now region 15.
+    1201: "Arica", 1202: "Camarones", 1301: "Putre", 1302: "General Lagos",
+    # Los Lagos's province of Valdivia (105), now region 14.
+    10501: "Valdivia", 10502: "Corral", 10503: "Futrono", 10504: "La Unión", 10505: "Lago Ranco", 10506: "Lanco",
+    10507: "Los Lagos", 10508: "Máfil", 10509: "Mariquina", 10510: "Paillaco", 10511: "Panguipulli", 10512: "Río Bueno",
+    # Biobío's province of Ñuble (084), now region 16.
+    8401: "Chillán", 8402: "Bulnes", 8403: "Cobquecura", 8404: "Coelemu", 8405: "Coihueco", 8406: "Chillán Viejo", 8407: "El Carmen",
+    8408: "Ninhue", 8409: "Ñiquén", 8410: "Pemuco", 8411: "Pinto", 8412: "Portezuelo", 8413: "Quillón", 8414: "Quirihue",
+    8415: "Ránquil", 8416: "San Carlos", 8417: "San Fabián", 8418: "San Ignacio", 8419: "San Nicolás", 8420: "Trehuaco", 8421: "Yungay",
+    # Antártica, drawn with Cabo de Hornos in the Census 2024 division.
+    12202: "Cabo de Hornos",
+}
+
+LEVELS = ["Auto", "Commune", "Province", "Region"]
+LEVELS_ES = ["Automático", "Comuna", "Provincia", "Región"]
+LEVEL_HELP = "Whether the codes and names are communes, provinces or regions. Auto tells from the layer."
+LEVEL_HELP_ES = "Si los códigos y nombres son de comunas, provincias o regiones. Automático lo deduce de la capa."
+KEY_HELP = "The field holding the CUT code (1101 or 01101) or the name. Blank: the tool finds it."
+KEY_HELP_ES = "El campo con el código único territorial (1101 o 01101) o el nombre. En blanco: la herramienta lo encuentra."
+
+# The tools, with their Spanish: (manifest entry, {english: spanish}).
+TOOLS = [
+    ({
+        "id": "join-cut", "name": "Join Table by CUT", "toolbox": "IDE Chile",
+        "summary": "Joins a CSV table to communes, provinces or regions by their código único territorial (CUT) or their name: codes with or without the leading zero, names however they are spelt, and the codes of before Ñuble (2018) and Arica y Parinacota and Los Ríos (2007). The table may be semicolon-separated and in Windows-1252, with decimal commas.",
+        "params": [
+            {"name": "layer", "label": "Layer of communes, provinces or regions", "kind": "vectorLayer", "required": True, "help": "A layer with a CUT or name field: Census 2024 › Communes, Provinces or Regions, or any other."},
+            {"name": "table", "label": "Table (CSV)", "kind": "file", "required": True, "extensions": ["csv", "txt", "tsv"], "help": "A CSV file with a column of CUT codes or names, as the INE, SINIM, CASEN, Servel or DEIS publish them."},
+            {"name": "level", "label": "Level", "kind": "choice", "choices": LEVELS, "default": "Auto", "help": LEVEL_HELP},
+            {"name": "layer_key", "label": "Key field in the layer", "kind": "text", "default": "", "help": KEY_HELP},
+            {"name": "table_key", "label": "Key column in the table", "kind": "text", "default": "", "help": "The column holding the CUT code or the name. Blank: the tool finds it."},
+            {"name": "keep_unmatched", "label": "Keep features without a row", "kind": "bool", "default": True, "help": "Off: the result has only the features the table has a row for."},
+        ],
+    }, {
+        "Join Table by CUT": "Unir tabla por CUT",
+        "Joins a CSV table to communes, provinces or regions by their código único territorial (CUT) or their name: codes with or without the leading zero, names however they are spelt, and the codes of before Ñuble (2018) and Arica y Parinacota and Los Ríos (2007). The table may be semicolon-separated and in Windows-1252, with decimal commas.": "Une una tabla CSV a comunas, provincias o regiones por su código único territorial (CUT) o por su nombre: códigos con o sin el cero inicial, nombres como vengan escritos, y los códigos de antes de Ñuble (2018) y de Arica y Parinacota y Los Ríos (2007). La tabla puede venir separada por punto y coma, en Windows-1252 y con decimales con coma.",
+        "Layer of communes, provinces or regions": "Capa de comunas, provincias o regiones",
+        "A layer with a CUT or name field: Census 2024 › Communes, Provinces or Regions, or any other.": "Una capa con un campo de CUT o de nombre: Censo 2024 › Comunas, Provincias o Regiones, o cualquier otra.",
+        "Table (CSV)": "Tabla (CSV)",
+        "A CSV file with a column of CUT codes or names, as the INE, SINIM, CASEN, Servel or DEIS publish them.": "Un archivo CSV con una columna de códigos CUT o de nombres, como los publican el INE, SINIM, CASEN, Servel o DEIS.",
+        "Key field in the layer": "Campo clave en la capa",
+        "Key column in the table": "Columna clave en la tabla",
+        "The column holding the CUT code or the name. Blank: the tool finds it.": "La columna con el código único territorial o el nombre. En blanco: la herramienta la encuentra.",
+        "Keep features without a row": "Conservar entidades sin fila",
+        "Off: the result has only the features the table has a row for.": "Desactivado: el resultado tiene solo las entidades con una fila en la tabla.",
+    }),
+    ({
+        "id": "assign-cut", "name": "Assign Commune to Points", "toolbox": "IDE Chile",
+        "summary": "Gives each point the commune, province and region it falls in, with their CUT codes and names, from a layer of communes (Census 2024 › Communes, or provinces or regions).",
+        "params": [
+            {"name": "points", "label": "Points", "kind": "pointLayer", "required": True, "help": "Addresses, stations, premises… in the same coordinate system as the communes."},
+            {"name": "communes", "label": "Communes, provinces or regions", "kind": "polygonLayer", "required": True, "help": "Census 2024 › Communes gives all three levels; a layer of provinces or regions gives its own and above."},
+            {"name": "level", "label": "Level", "kind": "choice", "choices": LEVELS, "default": "Auto", "help": LEVEL_HELP},
+            {"name": "key", "label": "Key field in the polygons", "kind": "text", "default": "", "help": KEY_HELP},
+        ],
+    }, {
+        "Assign Commune to Points": "Asignar comuna a puntos",
+        "Gives each point the commune, province and region it falls in, with their CUT codes and names, from a layer of communes (Census 2024 › Communes, or provinces or regions).": "Da a cada punto la comuna, provincia y región en que cae, con sus códigos CUT y nombres, a partir de una capa de comunas (Censo 2024 › Comunas, o de provincias o regiones).",
+        "Points": "Puntos",
+        "Addresses, stations, premises… in the same coordinate system as the communes.": "Direcciones, estaciones, locales… en el mismo sistema de coordenadas que las comunas.",
+        "Communes, provinces or regions": "Comunas, provincias o regiones",
+        "Census 2024 › Communes gives all three levels; a layer of provinces or regions gives its own and above.": "Censo 2024 › Comunas da los tres niveles; una capa de provincias o regiones da el suyo y los superiores.",
+        "Key field in the polygons": "Campo clave en los polígonos",
+    }),
+    ({
+        "id": "complete-cut", "name": "Complete CUT", "toolbox": "IDE Chile",
+        "summary": "Adds the current CUT code and the official names of the commune, province and region to a layer that has a code or name field, however it is written: 4 or 5 digits, old codes, other spellings.",
+        "params": [
+            {"name": "layer", "label": "Layer", "kind": "vectorLayer", "required": True, "help": "Any layer with a field of CUT codes or of commune, province or region names."},
+            {"name": "key", "label": "Key field", "kind": "text", "default": "", "help": KEY_HELP},
+            {"name": "level", "label": "Level", "kind": "choice", "choices": LEVELS, "default": "Auto", "help": LEVEL_HELP},
+        ],
+    }, {
+        "Complete CUT": "Completar CUT",
+        "Adds the current CUT code and the official names of the commune, province and region to a layer that has a code or name field, however it is written: 4 or 5 digits, old codes, other spellings.": "Añade el código único territorial vigente y los nombres oficiales de comuna, provincia y región a una capa que tenga un campo de código o de nombre, como venga escrito: 4 o 5 dígitos, códigos antiguos, otras grafías.",
+        "Layer": "Capa",
+        "Any layer with a field of CUT codes or of commune, province or region names.": "Cualquier capa con un campo de códigos CUT o de nombres de comuna, provincia o región.",
+        "Key field": "Campo clave",
+    }),
+]
+
+TOOL_STRINGS_ES = {
+    "Level": "Nivel",
+    LEVEL_HELP: LEVEL_HELP_ES,
+    KEY_HELP: KEY_HELP_ES,
+    "IDE Chile": "IDE Chile",
+    **dict(zip(LEVELS, LEVELS_ES)),
+}
+
+# Messages the CUT tools build while they run (see src/cut.rs), with their Spanish.
+TOOL_MESSAGES = {
+    "The table is empty.": "La tabla está vacía.",
+    "The table has no column of CUT codes or names: name it in 'Key column in the table'.": "La tabla no tiene una columna de códigos CUT ni de nombres: indíquela en 'Columna clave en la tabla'.",
+    "The table has no column '{name}'.": "La tabla no tiene una columna '{name}'.",
+    "The layer has no field of CUT codes or names: name it in the key field.": "La capa no tiene un campo de códigos CUT ni de nombres: indíquelo en el campo clave.",
+    "The layer has no field '{name}'.": "La capa no tiene un campo '{name}'.",
+    "{name} has no features.": "{name} no tiene entidades.",
+    "Level: {level}. Key field in the layer: {field}. Key column in the table: {column}.": "Nivel: {level}. Campo clave en la capa: {field}. Columna clave en la tabla: {column}.",
+    "Level: {level}. Key field: {field}.": "Nivel: {level}. Campo clave: {field}.",
+    "{n} of {total} rows joined; {features} of {all} features got a row.": "{n} de {total} filas unidas; {features} de {all} entidades recibieron una fila.",
+    "{n} rows without a feature (see the table 'Rows without a feature').": "{n} filas sin entidad (vea la tabla 'Filas sin entidad').",
+    "{n} features without a row.": "{n} entidades sin fila.",
+    "{n} features without a row were left out.": "{n} entidades sin fila se dejaron fuera.",
+    "{n} of {total} points fall in a polygon; {outside} fall in none.": "{n} de {total} puntos caen en un polígono; {outside} no caen en ninguno.",
+    "{n} of {total} features recognised; {unmatched} not (see the field CUT_NOTA).": "{n} de {total} entidades reconocidas; {unmatched} no (vea el campo CUT_NOTA).",
+    "{n} old codes translated to today's.": "{n} códigos antiguos traducidos a los vigentes.",
+    "{n} names matched by another spelling.": "{n} nombres reconocidos por otra grafía.",
+    "The points and the polygons don't overlap: are they in the same coordinate system?": "Los puntos y los polígonos no se superponen: ¿están en el mismo sistema de coordenadas?",
+    "Rows without a feature": "Filas sin entidad",
+    "Row": "Fila",
+    "Reason": "Motivo",
+    "Joined": "Unida",
+    "With commune": "Con comuna",
+    "Completed": "Completada",
+    "Commune": "Comuna",
+    "Province": "Provincia",
+    "Region": "Región",
+    "not a known code": "no es un código conocido",
+    "not a known name": "no es un nombre conocido",
+    "empty": "vacío",
+    "duplicate of row {n}": "duplicado de la fila {n}",
+    "no feature with this code": "ninguna entidad con este código",
+    "old code {old}": "código antiguo {old}",
+    "spelt {name}": "escrito {name}",
+    "Division: INE, Census 2024 ({n} communes); table checked on {date}.": "División: INE, Censo 2024 ({n} comunas); tabla verificada el {date}.",
+}
+
+# The day communes.json was last read from the INE (keep with refresh.py's runs).
+COMMUNES_DATE = "2026-10-22"
+
+
+def communes_rs():
+    """src/communes.rs: the Census 2024 division and the aliases, checked against it."""
+    rows = COMMUNES["communes"]
+    by_name = {}
+    for r in rows:
+        r["name"] = titlecase(r["comuna"])
+        assert r["name"] not in by_name, r["name"]
+        by_name[r["name"]] = r
+    for alias, name in COMMUNE_ALIASES.items():
+        assert name in by_name, f"alias {alias!r} → {name!r}: no such commune"
+        assert alias not in by_name, f"alias {alias!r} is a commune's own name"
+    for old, name in OLD_CUTS.items():
+        assert name in by_name, f"old CUT {old} → {name!r}: no such commune"
+        assert old not in {r["cut"] for r in rows}, f"old CUT {old} is current"
+    provinces = {}
+    regions = {}
+    for r in rows:
+        provinces.setdefault(r["cod_provincia"], (titlecase(r["provincia"]), r["cod_region"]))
+        regions.setdefault(r["cod_region"], titlecase(r["region"]))
+        assert provinces[r["cod_provincia"]] == (titlecase(r["provincia"]), r["cod_region"]), r
+        assert regions[r["cod_region"]] == titlecase(r["region"]), r
+    assert set(regions) == set(REGIONS), set(regions) ^ set(REGIONS)
+    for alias, code in REGION_ALIASES.items():
+        assert code in regions, alias
+
+    def s(x):
+        return json.dumps(x, ensure_ascii=False)
+
+    out = [
+        "//! The Census 2024 division and the other names and codes the CUT tools recognise.",
+        "//! Generated by `generate.py` from `communes.json` (refresh.py reads it from the INE); edit the",
+        "//! aliases and old codes there, not this file.",
+        "",
+        "use crate::cut::{Commune, Province, Region};",
+        "",
+        f"/// The day the division was read from the INE's Census 2024 communes layer.",
+        f"pub const DATE: &str = {s(COMMUNES_DATE)};",
+        "",
+        "/// The communes, by CUT.",
+        "pub const COMMUNES: &[Commune] = &[",
+    ]
+    for r in rows:
+        out.append(f"    Commune {{ cut: {r['cut']}, name: {s(r['name'])}, province: {r['cod_provincia']}, region: {r['cod_region']} }},")
+    out += ["];", "", "/// The provinces, by code.", "pub const PROVINCES: &[Province] = &["]
+    for code, (name, region) in sorted(provinces.items()):
+        out.append(f"    Province {{ code: {code}, name: {s(name)}, region: {region} }},")
+    out += ["];", "", "/// The regions, by code, with their short names and Roman numerals.", "pub const REGIONS: &[Region] = &["]
+    for code, name in sorted(regions.items()):
+        short, roman = REGIONS[code]
+        out.append(f"    Region {{ code: {code}, name: {s(name)}, short: {s(short)}, roman: {s(roman)} }},")
+    out += ["];", "", "/// Other spellings of communes' names → the CUT.", "pub const COMMUNE_ALIASES: &[(&str, u32)] = &["]
+    for alias, name in COMMUNE_ALIASES.items():
+        out.append(f"    ({s(alias)}, {by_name[name]['cut']}),")
+    out += ["];", "", "/// Other names of regions → the code.", "pub const REGION_ALIASES: &[(&str, u32)] = &["]
+    for alias, code in REGION_ALIASES.items():
+        out.append(f"    ({s(alias)}, {code}),")
+    out += ["];", "", "/// Codes of before 2007 and 2018 (and Antártica's) → the current CUT.", "pub const OLD_CUTS: &[(u32, u32)] = &["]
+    for old, name in sorted(OLD_CUTS.items()):
+        out.append(f"    ({old}, {by_name[name]['cut']}),")
+    out += ["];", ""]
+    (root / "src" / "communes.rs").write_text("\n".join(out), encoding="utf-8")
+    return len(rows), len(provinces), len(regions)
 
 
 def command(e):
@@ -208,9 +477,16 @@ def main():
         "About IDE Chile": "Acerca de IDE Chile",
         "The sources behind the layers.": "Las fuentes de las capas.",
         "IDE Chile": "IDE Chile",
-        "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.": "Servicios geoespaciales públicos de Chile en capas de un clic: Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU y los Censos 2024 y 2017 del INE. Límites, suelos, uso de la tierra, humedales, hidrografía, planificación urbana, datos censales, red vial, escuelas y más, como imágenes de mapa o como entidades consultables.",
+        DESCRIPTION: DESCRIPTION_ES,
     })
     es.update(MESSAGES)
+    tools = []
+    for t, t_es in TOOLS:
+        tools.append(t)
+        es.update(t_es)
+    es.update(TOOL_STRINGS_ES)
+    es.update(TOOL_MESSAGES)
+    tool_ids = {"tool:" + t["id"] for t in tools}
     groups = []
     for en, es_label, items in TAB:
         es[en] = es_label
@@ -224,29 +500,31 @@ def main():
                     assert i in ids, i
                 out.append({"menu": menu_en, "icon": icon, "help": help_en, "items": entries})
             else:
-                assert it in ids or it in ("clear", "about"), it
+                assert it in ids or it in ("clear", "about") or it in tool_ids, it
                 out.append(it)
         groups.append({"label": en, "items": out})
     placed = {i for g in groups for it in g["items"] for i in (it["items"] if isinstance(it, dict) else [it])}
-    assert placed >= ids, ids - placed
+    assert placed >= ids | tool_ids, (ids | tool_ids) - placed
     manifest = {
         "id": "ide-chile",
         "name": "IDE Chile",
-        "version": "0.2.0",
-        "description": "Public geospatial services of Chile as one-click layers: the Geoportal de Chile (IDE Chile), IDE MINAGRI, IDE MINVU and the INE's Censuses 2024 and 2017. Boundaries, soils, land use, wetlands, hydrography, urban planning, census data, roads, schools and more, as map images or as features you can query.",
+        "version": VERSION,
+        "description": DESCRIPTION,
         "author": "Daniel Díaz",
         "homepage": "https://github.com/opengeos/rustgis-plugins/tree/main/plugins/ide-chile",
         "license": "MIT",
         "entry": "plugin.wasm",
         "abi": 1,
-        "minRustgisVersion": "0.2.0",
-        "permissions": ["edit", "network"],
+        # 0.3.0 brought layer.addUrl to plugins and files to their tools.
+        "minRustgisVersion": "0.3.0",
+        "permissions": ["edit", "files", "network"],
         "commands": commands,
-        "tools": [],
+        "tools": tools,
         "tab": {"label": "IDE Chile", "groups": groups},
         "i18n": {"es": es},
     }
     (root / "plugin.json").write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    n_communes, n_provinces, n_regions = communes_rs()
 
     def s(x):
         return json.dumps(x, ensure_ascii=False)
@@ -263,7 +541,7 @@ def main():
         )
     rs = "//! The layer catalog. Generated by `generate.py`: edit the table there, not this file.\n\nuse crate::{Entry, Sub};\n\n/// Every layer the plugin offers, in ribbon order.\npub const CATALOG: &[Entry] = &[\n" + "\n".join(rows) + "\n];\n"
     (root / "src" / "catalog.rs").write_text(rs, encoding="utf-8")
-    print(f"{len(LAYERS)} layers, {len(commands)} commands, {len(es)} Spanish strings")
+    print(f"{len(LAYERS)} layers, {len(commands)} commands, {len(tools)} tools, {len(es)} Spanish strings; {n_communes} communes, {n_provinces} provinces, {n_regions} regions")
 
 
 if __name__ == "__main__":

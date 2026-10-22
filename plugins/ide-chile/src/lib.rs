@@ -9,16 +9,25 @@
 //! layers; chosen again, it is taken away.
 //!
 //! The sources: the Geoportal de Chile (IDE Chile, GeoServer WFS), IDE MINAGRI (CIREN's ArcGIS
-//! Server), IDE MINVU (ArcGIS Server) and the INE's Census 2017 (ArcGIS Online).
+//! Server), IDE MINVU (ArcGIS Server) and the INE's Censuses 2024 and 2017 (ArcGIS Online).
+//!
+//! The CUT tools (`cut.rs`) join tables to communes, provinces and regions by their código único
+//! territorial, assign communes to points and complete codes and names, against the Census 2024
+//! division (`communes.rs`, generated from the INE's layer).
 
-use rustgis_plugin::{Request, Value, host, json};
+// On a native target (the tests) the entry points aren't exported, so the commands look unused.
+#![cfg_attr(not(target_arch = "wasm32"), allow(dead_code))]
+
+use rustgis_plugin::{Kind, Request, Value, host, json};
 
 mod catalog;
+mod communes;
+pub mod cut;
 
 pub use catalog::CATALOG;
 
 /// `plugin.json`, for its translations.
-const MANIFEST: &str = include_str!("../plugin.json");
+pub(crate) const MANIFEST: &str = include_str!("../plugin.json");
 
 /// A layer in the catalog.
 #[derive(Clone, Copy, Debug)]
@@ -64,7 +73,10 @@ const MAX_SUBS: usize = 8;
 /// out, the box would ask a national layer for most of itself.
 const MAX_VIEW_SCALE: f64 = 2_000_000.0;
 
-fn handle(req: Request) -> Result<Value, String> {
+fn handle(mut req: Request) -> Result<Value, String> {
+    if req.kind == Kind::Tool {
+        return cut::run(&mut req);
+    }
     if let Some(e) = CATALOG.iter().find(|e| e.id == req.id) {
         return choose(&req, e, req.bool("map").unwrap_or(false));
     }
@@ -75,6 +87,9 @@ fn handle(req: Request) -> Result<Value, String> {
     }
 }
 
+// The module's entry points. Only for the WebAssembly build: on a native target (the tests) they
+// would be roots that link the host's imports, which no native library provides.
+#[cfg(target_arch = "wasm32")]
 rustgis_plugin::export!(handle);
 
 /// The map's tile layers, top first: `[{"index", "name", "id", "overlay", …}]`.
@@ -341,18 +356,45 @@ mod tests {
         for c in commands {
             assert!(CATALOG.iter().any(|e| e.id == c) || ["clear", "about"].contains(&c), "{c} isn't handled");
         }
-        assert_eq!(manifest["permissions"], json!(["edit", "network"]));
-        // Every item of the tab is a command.
+        assert_eq!(manifest["permissions"], json!(["edit", "files", "network"]));
+        assert_eq!(manifest["minRustgisVersion"], "0.3.0");
+        // Every item of the tab is a command or a tool, and every tool is handled.
         let ids: Vec<&str> = manifest["commands"].as_array().unwrap().iter().filter_map(|c| c["id"].as_str()).collect();
+        let tools: Vec<String> =
+            manifest["tools"].as_array().unwrap().iter().map(|t| format!("tool:{}", t["id"].as_str().unwrap())).collect();
+        assert_eq!(tools, ["tool:join-cut", "tool:assign-cut", "tool:complete-cut"]);
         for g in manifest["tab"]["groups"].as_array().unwrap() {
             for it in g["items"].as_array().unwrap() {
                 match it {
-                    Value::String(id) => assert!(ids.contains(&id.as_str()), "{id}"),
+                    Value::String(id) => assert!(ids.contains(&id.as_str()) || tools.contains(id), "{id}"),
                     menu => {
                         for id in menu["items"].as_array().unwrap() {
                             assert!(ids.contains(&id.as_str().unwrap()), "{id}");
                         }
                     }
+                }
+            }
+        }
+        for t in manifest["tools"].as_array().unwrap() {
+            let req = Request {
+                kind: Kind::Tool,
+                id: t["id"].as_str().unwrap().to_string(),
+                params: json!({}),
+                layers: Default::default(),
+                files: Default::default(),
+                lang: "en".to_string(),
+                panel: Default::default(),
+                panel_changed: Vec::new(),
+            };
+            // Without its layers the tool fails on a missing parameter, not on an unknown id.
+            // (cut::run directly: handle() would link the host imports into the test binary.)
+            let err = cut::run(&mut req.clone()).unwrap_err();
+            assert!(err.contains("is required"), "{}: {err}", t["id"]);
+            for p in t["params"].as_array().unwrap() {
+                let kind = p["kind"].as_str().unwrap();
+                assert!(["vectorLayer", "polygonLayer", "pointLayer", "file", "choice", "text", "bool"].contains(&kind), "{kind}");
+                if kind == "file" {
+                    assert!(p["required"] == true && !p["extensions"].as_array().unwrap().is_empty());
                 }
             }
         }
@@ -368,9 +410,26 @@ mod tests {
                 assert!(es.contains_key(s), "no Spanish for {s:?}");
             }
         }
+        for t in manifest["tools"].as_array().unwrap() {
+            for k in ["name", "summary", "toolbox"] {
+                let s = t[k].as_str().unwrap();
+                assert!(es.contains_key(s), "no Spanish for {s:?}");
+            }
+            for p in t["params"].as_array().unwrap() {
+                for k in ["label", "help"] {
+                    let s = p[k].as_str().unwrap();
+                    assert!(es.contains_key(s), "no Spanish for {s:?}");
+                }
+                for c in p["choices"].as_array().into_iter().flatten() {
+                    assert!(es.contains_key(c.as_str().unwrap()), "no Spanish for {c}");
+                }
+            }
+        }
         for g in manifest["tab"]["groups"].as_array().unwrap() {
             assert!(es.contains_key(g["label"].as_str().unwrap()), "{}", g["label"]);
         }
+        // The INE's field names the tools write are what the Census 2024 layers carry.
+        assert_eq!(cut::Place::field_names(cut::Level::Commune), ["CUT", "COMUNA", "COD_PROVINCIA", "PROVINCIA", "COD_REGION", "REGION"]);
     }
 
     /// Santiago at 1:150,000, as `host.view` reports it.

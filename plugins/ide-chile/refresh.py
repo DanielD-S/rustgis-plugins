@@ -1,11 +1,18 @@
-"""Reads what each ArcGIS service in the table offers and writes services.json for generate.py.
+"""Reads what each ArcGIS service in the table offers and writes services.json for generate.py,
+and the communes of the Census 2024 for communes.json.
 
     python plugins/ide-chile/refresh.py && python plugins/ide-chile/generate.py && cargo fmt -p ide-chile
+    python plugins/ide-chile/refresh.py communes    # communes.json only
 
 For every ArcGIS entry: the service's queryable layers (group layers can't be queried), each with
 its name, geometry type and extent in Web Mercator (EPSG:3857), from which the plugin picks the
 layers that reach the map view. An extent in another system is left out (the layer is then always
 considered).
+
+communes.json is the political-administrative division the INE took the Census 2024 on, from its
+communes layer: each commune's CUT (código único territorial) with its name and its province's
+and region's codes and names, as the INE spells them. The CUT tools (`src/cut.rs`) match codes
+and names against it.
 """
 
 import concurrent.futures
@@ -13,6 +20,7 @@ import importlib.util
 import json
 import math
 import pathlib
+import sys
 import urllib.request
 
 root = pathlib.Path(__file__).resolve().parent
@@ -64,7 +72,30 @@ def fetch(entry):
     return entry["id"], {"service": base, "layers": layers}
 
 
+def communes():
+    """Writes communes.json from the Census 2024 communes layer (the whole layer, no geometry)."""
+    entry = next(e for e in gen.LAYERS if e["id"] == "census-2024-communes")
+    (layer,) = entry["subs"]
+    url = f"{entry['service']}/{layer[0]}/query?where=1%3D1&outFields=CUT,COD_REGION,REGION,COD_PROVINCIA,PROVINCIA,COMUNA&returnGeometry=false&f=json"
+    d = get(url)
+    assert not d.get("exceededTransferLimit"), "the communes didn't come whole"
+    rows = []
+    for f in d["features"]:
+        a = f["attributes"]
+        rows.append({k.lower(): a[k] for k in ("CUT", "COD_REGION", "REGION", "COD_PROVINCIA", "PROVINCIA", "COMUNA")})
+    rows.sort(key=lambda r: r["cut"])
+    assert len(rows) == len({r["cut"] for r in rows}), "duplicate CUT"
+    assert all(1101 <= r["cut"] <= 16399 and r["cut"] // 1000 == r["cod_region"] and r["cut"] // 100 == r["cod_provincia"] for r in rows)
+    out = {"source": entry["service"], "layer": layer[0], "credit": entry["credit"], "communes": rows}
+    (root / "communes.json").write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    print(f"communes.json: {len(rows)} communes, {len({r['cod_provincia'] for r in rows})} provinces, {len({r['cod_region'] for r in rows})} regions")
+
+
 def main():
+    if sys.argv[1:] == ["communes"]:
+        communes()
+        return
+    communes()
     entries = [e for e in gen.LAYERS if e["kind"] == "arcgis"]
     with concurrent.futures.ThreadPoolExecutor(8) as pool:
         services = dict(pool.map(fetch, entries))

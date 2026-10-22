@@ -1,0 +1,2767 @@
+{
+ "source": "https://services5.arcgis.com/hUyD8u3TeZLKPe4T/arcgis/rest/services/L%C3%ADmites_DPA___Censo_2024/FeatureServer",
+ "layer": 4,
+ "credit": "INE, Censo 2024 (geoine-ine-chile.opendata.arcgis.com)",
+ "communes": [
+  {
+   "cut": 1101,
+   "cod_region": 1,
+   "region": "TARAPACÁ",
+   "cod_provincia": 11,
+   "provincia": "IQUIQUE",
+   "comuna": "IQUIQUE"
+  },
+  {
+   "cut": 1107,
+   "cod_region": 1,
+   "region": "TARAPACÁ",
+   "cod_provincia": 11,
+   "provincia": "IQUIQUE",
+   "comuna": "ALTO HOSPICIO"
+  },
+  {
+   "cut": 1401,
+   "cod_region": 1,
+   "region": "TARAPACÁ",
+   "cod_provincia": 14,
+   "provincia": "DEL TAMARUGAL",
+   "comuna": "POZO ALMONTE"
+  },
+  {
+   "cut": 1402,
+   "cod_region": 1,
+   "region": "TARAPACÁ",
+   "cod_provincia": 14,
+   "provincia": "DEL TAMARUGAL",
+   "comuna": "CAMIÑA"
+  },
+  {
+   "cut": 1403,
+   "cod_region": 1,
+   "region": "TARAPACÁ",
+   "cod_provincia": 14,
+   "provincia": "DEL TAMARUGAL",
+   "comuna": "COLCHANE"
+  },
+  {
+   "cut": 1404,
+   "cod_region": 1,
+   "region": "TARAPACÁ",
+   "cod_provincia": 14,
+   "provincia": "DEL TAMARUGAL",
+   "comuna": "HUARA"
+  },
+  {
+   "cut": 1405,
+   "cod_region": 1,
+   "region": "TARAPACÁ",
+   "cod_provincia": 14,
+   "provincia": "DEL TAMARUGAL",
+   "comuna": "PICA"
+  },
+  {
+   "cut": 2101,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 21,
+   "provincia": "ANTOFAGASTA",
+   "comuna": "ANTOFAGASTA"
+  },
+  {
+   "cut": 2102,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 21,
+   "provincia": "ANTOFAGASTA",
+   "comuna": "MEJILLONES"
+  },
+  {
+   "cut": 2103,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 21,
+   "provincia": "ANTOFAGASTA",
+   "comuna": "SIERRA GORDA"
+  },
+  {
+   "cut": 2104,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 21,
+   "provincia": "ANTOFAGASTA",
+   "comuna": "TALTAL"
+  },
+  {
+   "cut": 2201,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 22,
+   "provincia": "EL LOA",
+   "comuna": "CALAMA"
+  },
+  {
+   "cut": 2202,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 22,
+   "provincia": "EL LOA",
+   "comuna": "OLLAGÜE"
+  },
+  {
+   "cut": 2203,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 22,
+   "provincia": "EL LOA",
+   "comuna": "SAN PEDRO DE ATACAMA"
+  },
+  {
+   "cut": 2301,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 23,
+   "provincia": "TOCOPILLA",
+   "comuna": "TOCOPILLA"
+  },
+  {
+   "cut": 2302,
+   "cod_region": 2,
+   "region": "ANTOFAGASTA",
+   "cod_provincia": 23,
+   "provincia": "TOCOPILLA",
+   "comuna": "MARÍA ELENA"
+  },
+  {
+   "cut": 3101,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 31,
+   "provincia": "COPIAPÓ",
+   "comuna": "COPIAPÓ"
+  },
+  {
+   "cut": 3102,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 31,
+   "provincia": "COPIAPÓ",
+   "comuna": "CALDERA"
+  },
+  {
+   "cut": 3103,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 31,
+   "provincia": "COPIAPÓ",
+   "comuna": "TIERRA AMARILLA"
+  },
+  {
+   "cut": 3201,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 32,
+   "provincia": "CHAÑARAL",
+   "comuna": "CHAÑARAL"
+  },
+  {
+   "cut": 3202,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 32,
+   "provincia": "CHAÑARAL",
+   "comuna": "DIEGO DE ALMAGRO"
+  },
+  {
+   "cut": 3301,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 33,
+   "provincia": "HUASCO",
+   "comuna": "VALLENAR"
+  },
+  {
+   "cut": 3302,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 33,
+   "provincia": "HUASCO",
+   "comuna": "ALTO DEL CARMEN"
+  },
+  {
+   "cut": 3303,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 33,
+   "provincia": "HUASCO",
+   "comuna": "FREIRINA"
+  },
+  {
+   "cut": 3304,
+   "cod_region": 3,
+   "region": "ATACAMA",
+   "cod_provincia": 33,
+   "provincia": "HUASCO",
+   "comuna": "HUASCO"
+  },
+  {
+   "cut": 4101,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 41,
+   "provincia": "ELQUI",
+   "comuna": "LA SERENA"
+  },
+  {
+   "cut": 4102,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 41,
+   "provincia": "ELQUI",
+   "comuna": "COQUIMBO"
+  },
+  {
+   "cut": 4103,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 41,
+   "provincia": "ELQUI",
+   "comuna": "ANDACOLLO"
+  },
+  {
+   "cut": 4104,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 41,
+   "provincia": "ELQUI",
+   "comuna": "LA HIGUERA"
+  },
+  {
+   "cut": 4105,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 41,
+   "provincia": "ELQUI",
+   "comuna": "PAIHUANO"
+  },
+  {
+   "cut": 4106,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 41,
+   "provincia": "ELQUI",
+   "comuna": "VICUÑA"
+  },
+  {
+   "cut": 4201,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 42,
+   "provincia": "CHOAPA",
+   "comuna": "ILLAPEL"
+  },
+  {
+   "cut": 4202,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 42,
+   "provincia": "CHOAPA",
+   "comuna": "CANELA"
+  },
+  {
+   "cut": 4203,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 42,
+   "provincia": "CHOAPA",
+   "comuna": "LOS VILOS"
+  },
+  {
+   "cut": 4204,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 42,
+   "provincia": "CHOAPA",
+   "comuna": "SALAMANCA"
+  },
+  {
+   "cut": 4301,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 43,
+   "provincia": "LIMARÍ",
+   "comuna": "OVALLE"
+  },
+  {
+   "cut": 4302,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 43,
+   "provincia": "LIMARÍ",
+   "comuna": "COMBARBALÁ"
+  },
+  {
+   "cut": 4303,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 43,
+   "provincia": "LIMARÍ",
+   "comuna": "MONTE PATRIA"
+  },
+  {
+   "cut": 4304,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 43,
+   "provincia": "LIMARÍ",
+   "comuna": "PUNITAQUI"
+  },
+  {
+   "cut": 4305,
+   "cod_region": 4,
+   "region": "COQUIMBO",
+   "cod_provincia": 43,
+   "provincia": "LIMARÍ",
+   "comuna": "RÍO HURTADO"
+  },
+  {
+   "cut": 5101,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 51,
+   "provincia": "VALPARAÍSO",
+   "comuna": "VALPARAÍSO"
+  },
+  {
+   "cut": 5102,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 51,
+   "provincia": "VALPARAÍSO",
+   "comuna": "CASABLANCA"
+  },
+  {
+   "cut": 5103,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 51,
+   "provincia": "VALPARAÍSO",
+   "comuna": "CONCÓN"
+  },
+  {
+   "cut": 5104,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 51,
+   "provincia": "VALPARAÍSO",
+   "comuna": "JUAN FERNÁNDEZ"
+  },
+  {
+   "cut": 5105,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 51,
+   "provincia": "VALPARAÍSO",
+   "comuna": "PUCHUNCAVÍ"
+  },
+  {
+   "cut": 5107,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 51,
+   "provincia": "VALPARAÍSO",
+   "comuna": "QUINTERO"
+  },
+  {
+   "cut": 5109,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 51,
+   "provincia": "VALPARAÍSO",
+   "comuna": "VIÑA DEL MAR"
+  },
+  {
+   "cut": 5201,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 52,
+   "provincia": "ISLA DE PASCUA",
+   "comuna": "ISLA DE PASCUA"
+  },
+  {
+   "cut": 5301,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 53,
+   "provincia": "LOS ANDES",
+   "comuna": "LOS ANDES"
+  },
+  {
+   "cut": 5302,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 53,
+   "provincia": "LOS ANDES",
+   "comuna": "CALLE LARGA"
+  },
+  {
+   "cut": 5303,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 53,
+   "provincia": "LOS ANDES",
+   "comuna": "RINCONADA"
+  },
+  {
+   "cut": 5304,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 53,
+   "provincia": "LOS ANDES",
+   "comuna": "SAN ESTEBAN"
+  },
+  {
+   "cut": 5401,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 54,
+   "provincia": "PETORCA",
+   "comuna": "LA LIGUA"
+  },
+  {
+   "cut": 5402,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 54,
+   "provincia": "PETORCA",
+   "comuna": "CABILDO"
+  },
+  {
+   "cut": 5403,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 54,
+   "provincia": "PETORCA",
+   "comuna": "PAPUDO"
+  },
+  {
+   "cut": 5404,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 54,
+   "provincia": "PETORCA",
+   "comuna": "PETORCA"
+  },
+  {
+   "cut": 5405,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 54,
+   "provincia": "PETORCA",
+   "comuna": "ZAPALLAR"
+  },
+  {
+   "cut": 5501,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 55,
+   "provincia": "QUILLOTA",
+   "comuna": "QUILLOTA"
+  },
+  {
+   "cut": 5502,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 55,
+   "provincia": "QUILLOTA",
+   "comuna": "CALERA"
+  },
+  {
+   "cut": 5503,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 55,
+   "provincia": "QUILLOTA",
+   "comuna": "HIJUELAS"
+  },
+  {
+   "cut": 5504,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 55,
+   "provincia": "QUILLOTA",
+   "comuna": "LA CRUZ"
+  },
+  {
+   "cut": 5506,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 55,
+   "provincia": "QUILLOTA",
+   "comuna": "NOGALES"
+  },
+  {
+   "cut": 5601,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 56,
+   "provincia": "SAN ANTONIO",
+   "comuna": "SAN ANTONIO"
+  },
+  {
+   "cut": 5602,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 56,
+   "provincia": "SAN ANTONIO",
+   "comuna": "ALGARROBO"
+  },
+  {
+   "cut": 5603,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 56,
+   "provincia": "SAN ANTONIO",
+   "comuna": "CARTAGENA"
+  },
+  {
+   "cut": 5604,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 56,
+   "provincia": "SAN ANTONIO",
+   "comuna": "EL QUISCO"
+  },
+  {
+   "cut": 5605,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 56,
+   "provincia": "SAN ANTONIO",
+   "comuna": "EL TABO"
+  },
+  {
+   "cut": 5606,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 56,
+   "provincia": "SAN ANTONIO",
+   "comuna": "SANTO DOMINGO"
+  },
+  {
+   "cut": 5701,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 57,
+   "provincia": "SAN FELIPE DE ACONCAGUA",
+   "comuna": "SAN FELIPE"
+  },
+  {
+   "cut": 5702,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 57,
+   "provincia": "SAN FELIPE DE ACONCAGUA",
+   "comuna": "CATEMU"
+  },
+  {
+   "cut": 5703,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 57,
+   "provincia": "SAN FELIPE DE ACONCAGUA",
+   "comuna": "LLAILLAY"
+  },
+  {
+   "cut": 5704,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 57,
+   "provincia": "SAN FELIPE DE ACONCAGUA",
+   "comuna": "PANQUEHUE"
+  },
+  {
+   "cut": 5705,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 57,
+   "provincia": "SAN FELIPE DE ACONCAGUA",
+   "comuna": "PUTAENDO"
+  },
+  {
+   "cut": 5706,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 57,
+   "provincia": "SAN FELIPE DE ACONCAGUA",
+   "comuna": "SANTA MARÍA"
+  },
+  {
+   "cut": 5801,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 58,
+   "provincia": "MARGA MARGA",
+   "comuna": "QUILPUÉ"
+  },
+  {
+   "cut": 5802,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 58,
+   "provincia": "MARGA MARGA",
+   "comuna": "LIMACHE"
+  },
+  {
+   "cut": 5803,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 58,
+   "provincia": "MARGA MARGA",
+   "comuna": "OLMUÉ"
+  },
+  {
+   "cut": 5804,
+   "cod_region": 5,
+   "region": "VALPARAÍSO",
+   "cod_provincia": 58,
+   "provincia": "MARGA MARGA",
+   "comuna": "VILLA ALEMANA"
+  },
+  {
+   "cut": 6101,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "RANCAGUA"
+  },
+  {
+   "cut": 6102,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "CODEGUA"
+  },
+  {
+   "cut": 6103,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "COINCO"
+  },
+  {
+   "cut": 6104,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "COLTAUCO"
+  },
+  {
+   "cut": 6105,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "DOÑIHUE"
+  },
+  {
+   "cut": 6106,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "GRANEROS"
+  },
+  {
+   "cut": 6107,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "LAS CABRAS"
+  },
+  {
+   "cut": 6108,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "MACHALÍ"
+  },
+  {
+   "cut": 6109,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "MALLOA"
+  },
+  {
+   "cut": 6110,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "MOSTAZAL"
+  },
+  {
+   "cut": 6111,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "OLIVAR"
+  },
+  {
+   "cut": 6112,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "PEUMO"
+  },
+  {
+   "cut": 6113,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "PICHIDEGUA"
+  },
+  {
+   "cut": 6114,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "QUINTA DE TILCOCO"
+  },
+  {
+   "cut": 6115,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "RENGO"
+  },
+  {
+   "cut": 6116,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "REQUÍNOA"
+  },
+  {
+   "cut": 6117,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 61,
+   "provincia": "CACHAPOAL",
+   "comuna": "SAN VICENTE"
+  },
+  {
+   "cut": 6201,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 62,
+   "provincia": "CARDENAL CARO",
+   "comuna": "PICHILEMU"
+  },
+  {
+   "cut": 6202,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 62,
+   "provincia": "CARDENAL CARO",
+   "comuna": "LA ESTRELLA"
+  },
+  {
+   "cut": 6203,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 62,
+   "provincia": "CARDENAL CARO",
+   "comuna": "LITUECHE"
+  },
+  {
+   "cut": 6204,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 62,
+   "provincia": "CARDENAL CARO",
+   "comuna": "MARCHIHUE"
+  },
+  {
+   "cut": 6205,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 62,
+   "provincia": "CARDENAL CARO",
+   "comuna": "NAVIDAD"
+  },
+  {
+   "cut": 6206,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 62,
+   "provincia": "CARDENAL CARO",
+   "comuna": "PAREDONES"
+  },
+  {
+   "cut": 6301,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "SAN FERNANDO"
+  },
+  {
+   "cut": 6302,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "CHÉPICA"
+  },
+  {
+   "cut": 6303,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "CHIMBARONGO"
+  },
+  {
+   "cut": 6304,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "LOLOL"
+  },
+  {
+   "cut": 6305,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "NANCAGUA"
+  },
+  {
+   "cut": 6306,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "PALMILLA"
+  },
+  {
+   "cut": 6307,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "PERALILLO"
+  },
+  {
+   "cut": 6308,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "PLACILLA"
+  },
+  {
+   "cut": 6309,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "PUMANQUE"
+  },
+  {
+   "cut": 6310,
+   "cod_region": 6,
+   "region": "LIBERTADOR GENERAL BERNARDO O'HIGGINS",
+   "cod_provincia": 63,
+   "provincia": "COLCHAGUA",
+   "comuna": "SANTA CRUZ"
+  },
+  {
+   "cut": 7101,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "TALCA"
+  },
+  {
+   "cut": 7102,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "CONSTITUCIÓN"
+  },
+  {
+   "cut": 7103,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "CUREPTO"
+  },
+  {
+   "cut": 7104,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "EMPEDRADO"
+  },
+  {
+   "cut": 7105,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "MAULE"
+  },
+  {
+   "cut": 7106,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "PELARCO"
+  },
+  {
+   "cut": 7107,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "PENCAHUE"
+  },
+  {
+   "cut": 7108,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "RÍO CLARO"
+  },
+  {
+   "cut": 7109,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "SAN CLEMENTE"
+  },
+  {
+   "cut": 7110,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 71,
+   "provincia": "TALCA",
+   "comuna": "SAN RAFAEL"
+  },
+  {
+   "cut": 7201,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 72,
+   "provincia": "CAUQUENES",
+   "comuna": "CAUQUENES"
+  },
+  {
+   "cut": 7202,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 72,
+   "provincia": "CAUQUENES",
+   "comuna": "CHANCO"
+  },
+  {
+   "cut": 7203,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 72,
+   "provincia": "CAUQUENES",
+   "comuna": "PELLUHUE"
+  },
+  {
+   "cut": 7301,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "CURICÓ"
+  },
+  {
+   "cut": 7302,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "HUALAÑÉ"
+  },
+  {
+   "cut": 7303,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "LICANTÉN"
+  },
+  {
+   "cut": 7304,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "MOLINA"
+  },
+  {
+   "cut": 7305,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "RAUCO"
+  },
+  {
+   "cut": 7306,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "ROMERAL"
+  },
+  {
+   "cut": 7307,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "SAGRADA FAMILIA"
+  },
+  {
+   "cut": 7308,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "TENO"
+  },
+  {
+   "cut": 7309,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 73,
+   "provincia": "CURICÓ",
+   "comuna": "VICHUQUÉN"
+  },
+  {
+   "cut": 7401,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "LINARES"
+  },
+  {
+   "cut": 7402,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "COLBÚN"
+  },
+  {
+   "cut": 7403,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "LONGAVÍ"
+  },
+  {
+   "cut": 7404,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "PARRAL"
+  },
+  {
+   "cut": 7405,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "RETIRO"
+  },
+  {
+   "cut": 7406,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "SAN JAVIER"
+  },
+  {
+   "cut": 7407,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "VILLA ALEGRE"
+  },
+  {
+   "cut": 7408,
+   "cod_region": 7,
+   "region": "MAULE",
+   "cod_provincia": 74,
+   "provincia": "LINARES",
+   "comuna": "YERBAS BUENAS"
+  },
+  {
+   "cut": 8101,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "CONCEPCIÓN"
+  },
+  {
+   "cut": 8102,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "CORONEL"
+  },
+  {
+   "cut": 8103,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "CHIGUAYANTE"
+  },
+  {
+   "cut": 8104,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "FLORIDA"
+  },
+  {
+   "cut": 8105,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "HUALQUI"
+  },
+  {
+   "cut": 8106,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "LOTA"
+  },
+  {
+   "cut": 8107,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "PENCO"
+  },
+  {
+   "cut": 8108,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "SAN PEDRO DE LA PAZ"
+  },
+  {
+   "cut": 8109,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "SANTA JUANA"
+  },
+  {
+   "cut": 8110,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "TALCAHUANO"
+  },
+  {
+   "cut": 8111,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "TOMÉ"
+  },
+  {
+   "cut": 8112,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 81,
+   "provincia": "CONCEPCIÓN",
+   "comuna": "HUALPÉN"
+  },
+  {
+   "cut": 8201,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 82,
+   "provincia": "ARAUCO",
+   "comuna": "LEBU"
+  },
+  {
+   "cut": 8202,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 82,
+   "provincia": "ARAUCO",
+   "comuna": "ARAUCO"
+  },
+  {
+   "cut": 8203,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 82,
+   "provincia": "ARAUCO",
+   "comuna": "CAÑETE"
+  },
+  {
+   "cut": 8204,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 82,
+   "provincia": "ARAUCO",
+   "comuna": "CONTULMO"
+  },
+  {
+   "cut": 8205,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 82,
+   "provincia": "ARAUCO",
+   "comuna": "CURANILAHUE"
+  },
+  {
+   "cut": 8206,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 82,
+   "provincia": "ARAUCO",
+   "comuna": "LOS ÁLAMOS"
+  },
+  {
+   "cut": 8207,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 82,
+   "provincia": "ARAUCO",
+   "comuna": "TIRÚA"
+  },
+  {
+   "cut": 8301,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "LOS ÁNGELES"
+  },
+  {
+   "cut": 8302,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "ANTUCO"
+  },
+  {
+   "cut": 8303,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "CABRERO"
+  },
+  {
+   "cut": 8304,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "LAJA"
+  },
+  {
+   "cut": 8305,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "MULCHÉN"
+  },
+  {
+   "cut": 8306,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "NACIMIENTO"
+  },
+  {
+   "cut": 8307,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "NEGRETE"
+  },
+  {
+   "cut": 8308,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "QUILACO"
+  },
+  {
+   "cut": 8309,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "QUILLECO"
+  },
+  {
+   "cut": 8310,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "SAN ROSENDO"
+  },
+  {
+   "cut": 8311,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "SANTA BÁRBARA"
+  },
+  {
+   "cut": 8312,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "TUCAPEL"
+  },
+  {
+   "cut": 8313,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "YUMBEL"
+  },
+  {
+   "cut": 8314,
+   "cod_region": 8,
+   "region": "BIOBÍO",
+   "cod_provincia": 83,
+   "provincia": "BIOBÍO",
+   "comuna": "ALTO BIOBÍO"
+  },
+  {
+   "cut": 9101,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "TEMUCO"
+  },
+  {
+   "cut": 9102,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "CARAHUE"
+  },
+  {
+   "cut": 9103,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "CUNCO"
+  },
+  {
+   "cut": 9104,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "CURARREHUE"
+  },
+  {
+   "cut": 9105,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "FREIRE"
+  },
+  {
+   "cut": 9106,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "GALVARINO"
+  },
+  {
+   "cut": 9107,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "GORBEA"
+  },
+  {
+   "cut": 9108,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "LAUTARO"
+  },
+  {
+   "cut": 9109,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "LONCOCHE"
+  },
+  {
+   "cut": 9110,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "MELIPEUCO"
+  },
+  {
+   "cut": 9111,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "NUEVA IMPERIAL"
+  },
+  {
+   "cut": 9112,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "PADRE LAS CASAS"
+  },
+  {
+   "cut": 9113,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "PERQUENCO"
+  },
+  {
+   "cut": 9114,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "PITRUFQUÉN"
+  },
+  {
+   "cut": 9115,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "PUCÓN"
+  },
+  {
+   "cut": 9116,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "SAAVEDRA"
+  },
+  {
+   "cut": 9117,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "TEODORO SCHMIDT"
+  },
+  {
+   "cut": 9118,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "TOLTÉN"
+  },
+  {
+   "cut": 9119,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "VILCÚN"
+  },
+  {
+   "cut": 9120,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "VILLARRICA"
+  },
+  {
+   "cut": 9121,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 91,
+   "provincia": "CAUTÍN",
+   "comuna": "CHOLCHOL"
+  },
+  {
+   "cut": 9201,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "ANGOL"
+  },
+  {
+   "cut": 9202,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "COLLIPULLI"
+  },
+  {
+   "cut": 9203,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "CURACAUTÍN"
+  },
+  {
+   "cut": 9204,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "ERCILLA"
+  },
+  {
+   "cut": 9205,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "LONQUIMAY"
+  },
+  {
+   "cut": 9206,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "LOS SAUCES"
+  },
+  {
+   "cut": 9207,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "LUMACO"
+  },
+  {
+   "cut": 9208,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "PURÉN"
+  },
+  {
+   "cut": 9209,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "RENAICO"
+  },
+  {
+   "cut": 9210,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "TRAIGUÉN"
+  },
+  {
+   "cut": 9211,
+   "cod_region": 9,
+   "region": "LA ARAUCANÍA",
+   "cod_provincia": 92,
+   "provincia": "MALLECO",
+   "comuna": "VICTORIA"
+  },
+  {
+   "cut": 10101,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "PUERTO MONTT"
+  },
+  {
+   "cut": 10102,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "CALBUCO"
+  },
+  {
+   "cut": 10103,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "COCHAMÓ"
+  },
+  {
+   "cut": 10104,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "FRESIA"
+  },
+  {
+   "cut": 10105,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "FRUTILLAR"
+  },
+  {
+   "cut": 10106,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "LOS MUERMOS"
+  },
+  {
+   "cut": 10107,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "LLANQUIHUE"
+  },
+  {
+   "cut": 10108,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "MAULLÍN"
+  },
+  {
+   "cut": 10109,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 101,
+   "provincia": "LLANQUIHUE",
+   "comuna": "PUERTO VARAS"
+  },
+  {
+   "cut": 10201,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "CASTRO"
+  },
+  {
+   "cut": 10202,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "ANCUD"
+  },
+  {
+   "cut": 10203,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "CHONCHI"
+  },
+  {
+   "cut": 10204,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "CURACO DE VÉLEZ"
+  },
+  {
+   "cut": 10205,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "DALCAHUE"
+  },
+  {
+   "cut": 10206,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "PUQUELDÓN"
+  },
+  {
+   "cut": 10207,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "QUEILÉN"
+  },
+  {
+   "cut": 10208,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "QUELLÓN"
+  },
+  {
+   "cut": 10209,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "QUEMCHI"
+  },
+  {
+   "cut": 10210,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 102,
+   "provincia": "CHILOÉ",
+   "comuna": "QUINCHAO"
+  },
+  {
+   "cut": 10301,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 103,
+   "provincia": "OSORNO",
+   "comuna": "OSORNO"
+  },
+  {
+   "cut": 10302,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 103,
+   "provincia": "OSORNO",
+   "comuna": "PUERTO OCTAY"
+  },
+  {
+   "cut": 10303,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 103,
+   "provincia": "OSORNO",
+   "comuna": "PURRANQUE"
+  },
+  {
+   "cut": 10304,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 103,
+   "provincia": "OSORNO",
+   "comuna": "PUYEHUE"
+  },
+  {
+   "cut": 10305,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 103,
+   "provincia": "OSORNO",
+   "comuna": "RÍO NEGRO"
+  },
+  {
+   "cut": 10306,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 103,
+   "provincia": "OSORNO",
+   "comuna": "SAN JUAN DE LA COSTA"
+  },
+  {
+   "cut": 10307,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 103,
+   "provincia": "OSORNO",
+   "comuna": "SAN PABLO"
+  },
+  {
+   "cut": 10401,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 104,
+   "provincia": "PALENA",
+   "comuna": "CHAITÉN"
+  },
+  {
+   "cut": 10402,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 104,
+   "provincia": "PALENA",
+   "comuna": "FUTALEUFÚ"
+  },
+  {
+   "cut": 10403,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 104,
+   "provincia": "PALENA",
+   "comuna": "HUALAIHUÉ"
+  },
+  {
+   "cut": 10404,
+   "cod_region": 10,
+   "region": "LOS LAGOS",
+   "cod_provincia": 104,
+   "provincia": "PALENA",
+   "comuna": "PALENA"
+  },
+  {
+   "cut": 11101,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 111,
+   "provincia": "COYHAIQUE",
+   "comuna": "COYHAIQUE"
+  },
+  {
+   "cut": 11102,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 111,
+   "provincia": "COYHAIQUE",
+   "comuna": "LAGO VERDE"
+  },
+  {
+   "cut": 11201,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 112,
+   "provincia": "AYSÉN",
+   "comuna": "AYSÉN"
+  },
+  {
+   "cut": 11202,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 112,
+   "provincia": "AYSÉN",
+   "comuna": "CISNES"
+  },
+  {
+   "cut": 11203,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 112,
+   "provincia": "AYSÉN",
+   "comuna": "GUAITECAS"
+  },
+  {
+   "cut": 11301,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 113,
+   "provincia": "CAPITÁN PRAT",
+   "comuna": "COCHRANE"
+  },
+  {
+   "cut": 11302,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 113,
+   "provincia": "CAPITÁN PRAT",
+   "comuna": "O'HIGGINS"
+  },
+  {
+   "cut": 11303,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 113,
+   "provincia": "CAPITÁN PRAT",
+   "comuna": "TORTEL"
+  },
+  {
+   "cut": 11401,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 114,
+   "provincia": "GENERAL CARRERA",
+   "comuna": "CHILE CHICO"
+  },
+  {
+   "cut": 11402,
+   "cod_region": 11,
+   "region": "AYSÉN DEL GENERAL CARLOS IBÁÑEZ DEL CAMPO",
+   "cod_provincia": 114,
+   "provincia": "GENERAL CARRERA",
+   "comuna": "RÍO IBÁÑEZ"
+  },
+  {
+   "cut": 12101,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 121,
+   "provincia": "MAGALLANES",
+   "comuna": "PUNTA ARENAS"
+  },
+  {
+   "cut": 12102,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 121,
+   "provincia": "MAGALLANES",
+   "comuna": "LAGUNA BLANCA"
+  },
+  {
+   "cut": 12103,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 121,
+   "provincia": "MAGALLANES",
+   "comuna": "RÍO VERDE"
+  },
+  {
+   "cut": 12104,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 121,
+   "provincia": "MAGALLANES",
+   "comuna": "SAN GREGORIO"
+  },
+  {
+   "cut": 12201,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 122,
+   "provincia": "ANTÁRTICA CHILENA",
+   "comuna": "CABO DE HORNOS"
+  },
+  {
+   "cut": 12301,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 123,
+   "provincia": "TIERRA DEL FUEGO",
+   "comuna": "PORVENIR"
+  },
+  {
+   "cut": 12302,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 123,
+   "provincia": "TIERRA DEL FUEGO",
+   "comuna": "PRIMAVERA"
+  },
+  {
+   "cut": 12303,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 123,
+   "provincia": "TIERRA DEL FUEGO",
+   "comuna": "TIMAUKEL"
+  },
+  {
+   "cut": 12401,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 124,
+   "provincia": "ÚLTIMA ESPERANZA",
+   "comuna": "NATALES"
+  },
+  {
+   "cut": 12402,
+   "cod_region": 12,
+   "region": "MAGALLANES Y DE LA ANTÁRTICA CHILENA",
+   "cod_provincia": 124,
+   "provincia": "ÚLTIMA ESPERANZA",
+   "comuna": "TORRES DEL PAINE"
+  },
+  {
+   "cut": 13101,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "SANTIAGO"
+  },
+  {
+   "cut": 13102,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "CERRILLOS"
+  },
+  {
+   "cut": 13103,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "CERRO NAVIA"
+  },
+  {
+   "cut": 13104,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "CONCHALÍ"
+  },
+  {
+   "cut": 13105,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "EL BOSQUE"
+  },
+  {
+   "cut": 13106,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "ESTACIÓN CENTRAL"
+  },
+  {
+   "cut": 13107,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "HUECHURABA"
+  },
+  {
+   "cut": 13108,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "INDEPENDENCIA"
+  },
+  {
+   "cut": 13109,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LA CISTERNA"
+  },
+  {
+   "cut": 13110,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LA FLORIDA"
+  },
+  {
+   "cut": 13111,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LA GRANJA"
+  },
+  {
+   "cut": 13112,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LA PINTANA"
+  },
+  {
+   "cut": 13113,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LA REINA"
+  },
+  {
+   "cut": 13114,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LAS CONDES"
+  },
+  {
+   "cut": 13115,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LO BARNECHEA"
+  },
+  {
+   "cut": 13116,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LO ESPEJO"
+  },
+  {
+   "cut": 13117,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "LO PRADO"
+  },
+  {
+   "cut": 13118,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "MACUL"
+  },
+  {
+   "cut": 13119,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "MAIPÚ"
+  },
+  {
+   "cut": 13120,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "ÑUÑOA"
+  },
+  {
+   "cut": 13121,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "PEDRO AGUIRRE CERDA"
+  },
+  {
+   "cut": 13122,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "PEÑALOLÉN"
+  },
+  {
+   "cut": 13123,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "PROVIDENCIA"
+  },
+  {
+   "cut": 13124,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "PUDAHUEL"
+  },
+  {
+   "cut": 13125,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "QUILICURA"
+  },
+  {
+   "cut": 13126,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "QUINTA NORMAL"
+  },
+  {
+   "cut": 13127,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "RECOLETA"
+  },
+  {
+   "cut": 13128,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "RENCA"
+  },
+  {
+   "cut": 13129,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "SAN JOAQUÍN"
+  },
+  {
+   "cut": 13130,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "SAN MIGUEL"
+  },
+  {
+   "cut": 13131,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "SAN RAMÓN"
+  },
+  {
+   "cut": 13132,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 131,
+   "provincia": "SANTIAGO",
+   "comuna": "VITACURA"
+  },
+  {
+   "cut": 13201,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 132,
+   "provincia": "CORDILLERA",
+   "comuna": "PUENTE ALTO"
+  },
+  {
+   "cut": 13202,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 132,
+   "provincia": "CORDILLERA",
+   "comuna": "PIRQUE"
+  },
+  {
+   "cut": 13203,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 132,
+   "provincia": "CORDILLERA",
+   "comuna": "SAN JOSÉ DE MAIPO"
+  },
+  {
+   "cut": 13301,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 133,
+   "provincia": "CHACABUCO",
+   "comuna": "COLINA"
+  },
+  {
+   "cut": 13302,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 133,
+   "provincia": "CHACABUCO",
+   "comuna": "LAMPA"
+  },
+  {
+   "cut": 13303,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 133,
+   "provincia": "CHACABUCO",
+   "comuna": "TILTIL"
+  },
+  {
+   "cut": 13401,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 134,
+   "provincia": "MAIPO",
+   "comuna": "SAN BERNARDO"
+  },
+  {
+   "cut": 13402,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 134,
+   "provincia": "MAIPO",
+   "comuna": "BUIN"
+  },
+  {
+   "cut": 13403,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 134,
+   "provincia": "MAIPO",
+   "comuna": "CALERA DE TANGO"
+  },
+  {
+   "cut": 13404,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 134,
+   "provincia": "MAIPO",
+   "comuna": "PAINE"
+  },
+  {
+   "cut": 13501,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 135,
+   "provincia": "MELIPILLA",
+   "comuna": "MELIPILLA"
+  },
+  {
+   "cut": 13502,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 135,
+   "provincia": "MELIPILLA",
+   "comuna": "ALHUÉ"
+  },
+  {
+   "cut": 13503,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 135,
+   "provincia": "MELIPILLA",
+   "comuna": "CURACAVÍ"
+  },
+  {
+   "cut": 13504,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 135,
+   "provincia": "MELIPILLA",
+   "comuna": "MARÍA PINTO"
+  },
+  {
+   "cut": 13505,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 135,
+   "provincia": "MELIPILLA",
+   "comuna": "SAN PEDRO"
+  },
+  {
+   "cut": 13601,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 136,
+   "provincia": "TALAGANTE",
+   "comuna": "TALAGANTE"
+  },
+  {
+   "cut": 13602,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 136,
+   "provincia": "TALAGANTE",
+   "comuna": "EL MONTE"
+  },
+  {
+   "cut": 13603,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 136,
+   "provincia": "TALAGANTE",
+   "comuna": "ISLA DE MAIPO"
+  },
+  {
+   "cut": 13604,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 136,
+   "provincia": "TALAGANTE",
+   "comuna": "PADRE HURTADO"
+  },
+  {
+   "cut": 13605,
+   "cod_region": 13,
+   "region": "METROPOLITANA DE SANTIAGO",
+   "cod_provincia": 136,
+   "provincia": "TALAGANTE",
+   "comuna": "PEÑAFLOR"
+  },
+  {
+   "cut": 14101,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "VALDIVIA"
+  },
+  {
+   "cut": 14102,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "CORRAL"
+  },
+  {
+   "cut": 14103,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "LANCO"
+  },
+  {
+   "cut": 14104,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "LOS LAGOS"
+  },
+  {
+   "cut": 14105,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "MÁFIL"
+  },
+  {
+   "cut": 14106,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "MARIQUINA"
+  },
+  {
+   "cut": 14107,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "PAILLACO"
+  },
+  {
+   "cut": 14108,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 141,
+   "provincia": "VALDIVIA",
+   "comuna": "PANGUIPULLI"
+  },
+  {
+   "cut": 14201,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 142,
+   "provincia": "RANCO",
+   "comuna": "LA UNIÓN"
+  },
+  {
+   "cut": 14202,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 142,
+   "provincia": "RANCO",
+   "comuna": "FUTRONO"
+  },
+  {
+   "cut": 14203,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 142,
+   "provincia": "RANCO",
+   "comuna": "LAGO RANCO"
+  },
+  {
+   "cut": 14204,
+   "cod_region": 14,
+   "region": "LOS RÍOS",
+   "cod_provincia": 142,
+   "provincia": "RANCO",
+   "comuna": "RÍO BUENO"
+  },
+  {
+   "cut": 15101,
+   "cod_region": 15,
+   "region": "ARICA Y PARINACOTA",
+   "cod_provincia": 151,
+   "provincia": "ARICA",
+   "comuna": "ARICA"
+  },
+  {
+   "cut": 15102,
+   "cod_region": 15,
+   "region": "ARICA Y PARINACOTA",
+   "cod_provincia": 151,
+   "provincia": "ARICA",
+   "comuna": "CAMARONES"
+  },
+  {
+   "cut": 15201,
+   "cod_region": 15,
+   "region": "ARICA Y PARINACOTA",
+   "cod_provincia": 152,
+   "provincia": "PARINACOTA",
+   "comuna": "PUTRE"
+  },
+  {
+   "cut": 15202,
+   "cod_region": 15,
+   "region": "ARICA Y PARINACOTA",
+   "cod_provincia": 152,
+   "provincia": "PARINACOTA",
+   "comuna": "GENERAL LAGOS"
+  },
+  {
+   "cut": 16101,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "CHILLÁN"
+  },
+  {
+   "cut": 16102,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "BULNES"
+  },
+  {
+   "cut": 16103,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "CHILLÁN VIEJO"
+  },
+  {
+   "cut": 16104,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "EL CARMEN"
+  },
+  {
+   "cut": 16105,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "PEMUCO"
+  },
+  {
+   "cut": 16106,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "PINTO"
+  },
+  {
+   "cut": 16107,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "QUILLÓN"
+  },
+  {
+   "cut": 16108,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "SAN IGNACIO"
+  },
+  {
+   "cut": 16109,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 161,
+   "provincia": "DIGUILLÍN",
+   "comuna": "YUNGAY"
+  },
+  {
+   "cut": 16201,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 162,
+   "provincia": "ITATA",
+   "comuna": "QUIRIHUE"
+  },
+  {
+   "cut": 16202,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 162,
+   "provincia": "ITATA",
+   "comuna": "COBQUECURA"
+  },
+  {
+   "cut": 16203,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 162,
+   "provincia": "ITATA",
+   "comuna": "COELEMU"
+  },
+  {
+   "cut": 16204,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 162,
+   "provincia": "ITATA",
+   "comuna": "NINHUE"
+  },
+  {
+   "cut": 16205,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 162,
+   "provincia": "ITATA",
+   "comuna": "PORTEZUELO"
+  },
+  {
+   "cut": 16206,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 162,
+   "provincia": "ITATA",
+   "comuna": "RÁNQUIL"
+  },
+  {
+   "cut": 16207,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 162,
+   "provincia": "ITATA",
+   "comuna": "TREHUACO"
+  },
+  {
+   "cut": 16301,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 163,
+   "provincia": "PUNILLA",
+   "comuna": "SAN CARLOS"
+  },
+  {
+   "cut": 16302,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 163,
+   "provincia": "PUNILLA",
+   "comuna": "COIHUECO"
+  },
+  {
+   "cut": 16303,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 163,
+   "provincia": "PUNILLA",
+   "comuna": "ÑIQUÉN"
+  },
+  {
+   "cut": 16304,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 163,
+   "provincia": "PUNILLA",
+   "comuna": "SAN FABIÁN"
+  },
+  {
+   "cut": 16305,
+   "cod_region": 16,
+   "region": "ÑUBLE",
+   "cod_provincia": 163,
+   "provincia": "PUNILLA",
+   "comuna": "SAN NICOLÁS"
+  }
+ ]
+}

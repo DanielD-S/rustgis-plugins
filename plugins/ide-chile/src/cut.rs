@@ -418,6 +418,9 @@ pub fn detect_key<'a>(index: &Index, columns: &[(&'a str, Vec<&Value>)], only: O
 pub struct Table {
     pub columns: Vec<String>,
     pub rows: Vec<Vec<Value>>,
+    /// Rows that had more cells than the header (a stray separator): their extra cells are
+    /// dropped, and the tool says how many rows that happened to.
+    pub overlong: usize,
 }
 
 impl Table {
@@ -456,8 +459,12 @@ pub fn read_csv(bytes: &[u8]) -> Result<Table, String> {
         }
         columns.push(name);
     }
+    let mut overlong = 0;
     let raw: Vec<Vec<String>> = records
         .map(|mut r| {
+            if r.len() > columns.len() && r[columns.len()..].iter().any(|c| !c.trim().is_empty()) {
+                overlong += 1;
+            }
             r.resize(columns.len(), String::new());
             r
         })
@@ -482,7 +489,7 @@ pub fn read_csv(bytes: &[u8]) -> Result<Table, String> {
             rows[r].push(v);
         }
     }
-    Ok(Table { columns, rows })
+    Ok(Table { columns, rows, overlong })
 }
 
 /// A JSON number: an integer when it is one.
@@ -1089,6 +1096,13 @@ fn join(req: &mut Request) -> Result<Value, String> {
             &[("n", &n)],
         ));
     }
+    if table.overlong > 0 {
+        out = out.message(tr(
+            req,
+            "{n} rows have more cells than the header; the extra cells were left out.",
+            &[("n", &table.overlong.to_string())],
+        ));
+    }
     if !renamed.is_empty() {
         let list = renamed.join(", ");
         out = out.message(tr(req, "Columns the layer already had a field of were renamed: {list}.", &[("list", &list)]));
@@ -1403,6 +1417,10 @@ mod tests {
         assert_eq!(t.columns, ["a", "a_2", "b"]);
         assert_eq!(t.rows[0], vec![json!(1), json!(2), json!(3)]);
         assert_eq!(read_csv(b"").unwrap(), Table::default());
+        // A row with more cells than the header is counted; the extra cells are dropped.
+        let t = read_csv("a;b\n1;2;3\n4;5\n6;7;\n".as_bytes()).unwrap();
+        assert_eq!(t.overlong, 1, "a trailing empty cell doesn't count");
+        assert_eq!(t.rows[0], vec![json!(1), json!(2)]);
         // Numbers.
         assert_eq!(parse_chilean("1.234.567,89"), Some(1234567.89));
         assert_eq!(parse_chilean("1.234"), Some(1234.0));

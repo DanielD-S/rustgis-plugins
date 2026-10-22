@@ -1761,7 +1761,8 @@ mod tests {
         assert!(out["messages"][0].as_str().unwrap().starts_with("La capa no tiene un campo"));
         let mut req = request("complete-cut", json!({"layer": "E"}), &[("E", geojson::collection(vec![]))], &[]);
         assert_eq!(run(&mut req).unwrap_err(), "E no tiene entidades.");
-        let mut req = request("assign-cut", json!({"points": "E", "communes": "E"}), &[("E", geojson::collection(vec![]))], &[]);
+        let empty = || geojson::collection(vec![]);
+        let mut req = request("assign-cut", json!({"points": "P", "communes": "E"}), &[("P", empty()), ("E", empty())], &[]);
         assert_eq!(run(&mut req).unwrap_err(), "E no tiene entidades.");
     }
 }

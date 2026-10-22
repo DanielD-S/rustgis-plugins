@@ -780,6 +780,19 @@ fn properties(f: &Value) -> Map<String, Value> {
     f.get("properties").and_then(Value::as_object).cloned().unwrap_or_default()
 }
 
+/// Writes one of the INE's fields. A value the feature already had there, when it differs, is
+/// kept as `<field>_ORIG`: an empty one isn't worth keeping unless `keep_empty` (the key field
+/// itself), and an `_ORIG` already there, from an earlier run, is the original and stays.
+fn write_field(props: &mut Map<String, Value>, k: &str, v: Value, keep_empty: bool) {
+    if let Some(old) = props.get(k).cloned()
+        && old != v
+        && (keep_empty || !is_empty(&old))
+    {
+        props.entry(format!("{k}_ORIG")).or_insert(old);
+    }
+    props.insert(k.to_string(), v);
+}
+
 /// The features of the layer a tool parameter names, taken out of the request rather than
 /// copied: a tool reads each layer once, and the result is built by moving its features.
 fn take_features(req: &mut Request, param: &str) -> Result<Vec<Value>, String> {
@@ -1125,18 +1138,16 @@ fn assign(req: &mut Request) -> Result<Value, String> {
             }
             _ => None,
         };
-        match hit {
+        let new = match hit {
             Some(place) => {
                 inside += 1;
-                for (k, v) in place.properties() {
-                    props.insert(k.to_string(), v);
-                }
+                place.properties()
             }
-            None => {
-                for k in fields {
-                    props.entry(k.to_string()).or_insert(Value::Null);
-                }
-            }
+            None => Vec::new(),
+        };
+        for k in fields {
+            let v = new.iter().find(|(n, _)| n == k).map(|(_, v)| v.clone()).unwrap_or(Value::Null);
+            write_field(&mut props, k, v, false);
         }
         f["properties"] = Value::Object(props);
         out_features.push(f);
@@ -1196,16 +1207,7 @@ fn complete(req: &mut Request) -> Result<Value, String> {
         }
         for k in fields {
             let v = new.iter().find(|(n, _)| n == k).map(|(_, v)| v.clone()).unwrap_or(Value::Null);
-            // A field the layer already has, with another value, is kept as <field>_ORIG (an empty
-            // one isn't worth keeping, unless it is the key itself). An _ORIG that is already there,
-            // from an earlier run, is the original and stays.
-            if let Some(old) = props.get(*k).cloned()
-                && old != v
-                && (*k == field || !is_empty(&old))
-            {
-                props.entry(format!("{k}_ORIG")).or_insert(old);
-            }
-            props.insert(k.to_string(), v);
+            write_field(&mut props, k, v, *k == field);
         }
         props.insert("CUT_NOTA".to_string(), note);
         f["properties"] = Value::Object(props);
@@ -1622,7 +1624,8 @@ mod tests {
             square(6.0, 0.0, json!({"CUT": "RM"})),
         ]);
         let points = geojson::collection(vec![
-            geojson::feature(geojson::point(0.5, 0.5), json!({"id": 1})),
+            // A point that already says a (wrong) commune keeps it as COMUNA_ORIG.
+            geojson::feature(geojson::point(0.5, 0.5), json!({"id": 1, "COMUNA": "Arica"})),
             geojson::feature(geojson::point(2.5, 0.5), json!({"id": 2})),
             geojson::feature(geojson::point(9.0, 9.0), json!({"id": 3})),
         ]);
@@ -1631,6 +1634,7 @@ mod tests {
         let fs = out["layers"][0]["geojson"]["features"].as_array().unwrap();
         assert_eq!(out["layers"][0]["name"], "P (Con comuna)");
         assert_eq!(fs[0]["properties"]["COMUNA"], "Iquique");
+        assert_eq!(fs[0]["properties"]["COMUNA_ORIG"], "Arica");
         assert_eq!(fs[0]["properties"]["REGION"], "Tarapacá");
         assert_eq!(fs[1]["properties"]["CUT"], json!(16101), "by the old code");
         assert_eq!(fs[1]["properties"]["PROVINCIA"], "Diguillín");
